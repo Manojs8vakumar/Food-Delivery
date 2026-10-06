@@ -1,0 +1,138 @@
+/* Custom Styles for RasoiRush Food Delivery */
+
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;600;700;800;900&display=swap');
+
+:root {
+  --primary-color: #E23744;
+  --primary-hover: #cb2431;
+  --secondary-color: #1C1C1C;
+  --accent-gold: #FFB800;
+  --bg-light: #F8F9FA;
+  --text-main: #1F2937;
+  --text-muted: #6B7280;
+  --border-light: #E5E7EB;
+  --veg-green: #22C55E;
+  --nonveg-red: #EF4444;
+}
+
+body {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  color: var(--text-main);
+  background-color: #FAFAFB;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4, .brand-font {
+  font-family: 'Outfit', sans-serif;
+}
+
+/* Glassmorphism */
+.glass-header {
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(229, 231, 235, 0.8);
+}
+
+.glass-header-transparent {
+  background: linear-gradient(180deg, rgba(0,0,0,0.65) 0%, rgba(0,0,0,0) 100%);
+}
+
+.glass-card {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+}
+
+/* Hero Background Image */
+.hero-bg {
+  background: linear-gradient(180deg, rgba(17, 24, 39, 0.72) 0%, rgba(17, 24, 39, 0.88) 100%), 
+              url('https://images.unsplash.com/photo-1543353071-10c8ba85a904?w=1800&q=85') center/cover no-repeat;
+}
+
+/* Veg / Non-Veg Indicator Boxes */
+.veg-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border: 1.5px solid var(--veg-green);
+  border-radius: 3px;
+  background-color: white;
+}
+.veg-badge::after {
+  content: '';
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: var(--veg-green);
+}
+
+.nonveg-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border: 1.5px solid var(--nonveg-red);
+  border-radius: 3px;
+  background-color: white;
+}
+.nonveg-badge::after {
+  content: '';
+  width: 0;
+  height: 0;
+  border-left: 4.5px solid transparent;
+  border-right: 4.5px solid transparent;
+  border-bottom: 8px solid var(--nonveg-red);
+}
+
+/* Custom Scrollbars */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Category Avatar Hover Animation */
+.category-item {
+  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.category-item:hover {
+  transform: translateY(-4px) scale(1.03);
+}
+
+/* Restaurant Card Hover Effect */
+.restaurant-card {
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.restaurant-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 16px 32px -8px rgba(0, 0, 0, 0.12);
+}
+
+/* Pulse animation for live tracking */
+@keyframes pulse-ring {
+  0% { transform: scale(0.95); opacity: 0.8; }
+  50% { transform: scale(1.3); opacity: 0; }
+  100% { transform: scale(0.95); opacity: 0; }
+}
+
+.radar-pulse {
+  position: relative;
+}
+.radar-pulse::before {
+  content: '';
+  position: absolute;
+  top: -4px;
+  left: -4px;
+  right: -4px;
+  bottom: -4px;
+  border-radius: 50%;
+  background: rgba(226, 55, 68, 0.3);
+  animation: pulse-ring 2s infinite ease-in-out;
+}

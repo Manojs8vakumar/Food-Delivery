@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Orders - RasoiRush</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Alpine.js -->
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.8/dist/cdn.min.js"></script>
+
+  <!-- Custom CSS -->
+  <link rel="stylesheet" th:href="@{/css/style.css}">
+  <style>
+    [x-cloak] { display: none !important; }
+  </style>
+</head>
+<body class="bg-gray-50 text-gray-900 antialiased">
+
+  <!-- Toast Container -->
+  <div id="toast-container" class="fixed bottom-6 right-6 z-50 flex flex-col gap-2 max-w-sm pointer-events-none"></div>
+
+  <!-- Cart Drawer -->
+  <div th:replace="~{fragments/cart-drawer :: cartDrawer}"></div>
+
+  <!-- Navbar -->
+  <div th:replace="~{fragments/navbar :: navbar(false)}"></div>
+
+  <!-- Main Container -->
+  <main class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8">
+    
+    <div>
+      <h1 class="text-3xl font-black text-gray-900 brand-font">Order History</h1>
+      <p class="text-sm text-gray-500 mt-1">Review all your past culinary orders and track live status</p>
+    </div>
+
+    <!-- Empty State -->
+    <div th:if="${orders.isEmpty()}" class="bg-white rounded-3xl p-12 text-center border border-gray-100 shadow-xs">
+      <div class="w-20 h-20 mx-auto mb-4 bg-gray-100 text-gray-400 rounded-full flex items-center justify-center">
+        <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+      </div>
+      <h3 class="text-xl font-bold text-gray-800">No orders placed yet</h3>
+      <p class="text-sm text-gray-500 mt-1">Explore delicious restaurants and place your first order!</p>
+      <a href="/" class="mt-6 inline-block px-6 py-2.5 bg-rose-600 text-white font-bold text-sm rounded-xl shadow-md">
+        Browse Restaurants
+      </a>
+    </div>
+
+    <!-- Orders Feed -->
+    <div th:if="${!orders.isEmpty()}" class="space-y-4">
+      <div th:each="ord : ${orders}" class="bg-white rounded-3xl p-6 border border-gray-100 shadow-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 hover:border-gray-200 transition-all">
+        
+        <div class="space-y-1">
+          <div class="flex items-center gap-3">
+            <h3 class="text-lg font-black text-gray-900" th:text="${ord.restaurantName}"></h3>
+            <span class="text-[10px] font-black uppercase px-2 py-0.5 rounded-full"
+                  th:classappend="${ord.status == 'DELIVERED'} ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'"
+                  th:text="${ord.status}"></span>
+          </div>
+          <p class="text-xs text-gray-400" th:text="'Order #' + ${ord.orderNumber} + ' • ' + ${#temporals.format(ord.createdAt, 'dd MMM yyyy, hh:mm a')}"></p>
+          
+          <!-- Summary of items -->
+          <p class="text-xs text-gray-600 font-medium pt-2">
+            <span th:each="it, stat : ${ord.items}" th:text="${it.quantity} + 'x ' + ${it.itemName} + (${stat.last} ? '' : ', ')"></span>
+          </p>
+        </div>
+
+        <div class="flex items-center gap-4 sm:flex-col sm:items-end w-full sm:w-auto justify-between border-t sm:border-t-0 pt-4 sm:pt-0 border-gray-100">
+          <span class="text-lg font-black text-gray-900" th:text="'₹' + ${ord.totalAmount}"></span>
+          <a th:href="@{'/order/' + ${ord.orderNumber}}" class="px-5 py-2 bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold rounded-xl shadow-md shadow-rose-600/20 transition-all">
+            Track Order →
+          </a>
+        </div>
+
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Footer -->
+  <div th:replace="~{fragments/footer :: footer}"></div>
+
+  <!-- Scripts -->
+  <script th:src="@{/js/cart.js}"></script>
+  <script th:src="@{/js/app.js}"></script>
+</body>
+</html>

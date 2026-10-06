@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title th:text="${restaurant.name} + ' - Order Online | RasoiRush'">Restaurant Menu</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Alpine.js -->
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.8/dist/cdn.min.js"></script>
+
+  <!-- Custom CSS -->
+  <link rel="stylesheet" th:href="@{/css/style.css}">
+  <style>
+    [x-cloak] { display: none !important; }
+  </style>
+</head>
+<body class="bg-gray-50 text-gray-900 antialiased" 
+      x-data="{ 
+        activeCategory: '',
+        cartItems: [],
+        restaurantName: '[(${restaurant.name})]',
+        restaurantId: [(${restaurant.id})],
+        getItemQty(id) {
+          if (!window.CartStore) return 0;
+          return CartStore.getItemQuantity(id);
+        }
+      }"
+      x-init="
+        window.addEventListener('cart-updated', () => { 
+          $nextTick(() => { cartItems = window.CartStore ? window.CartStore.items : []; });
+        });
+      ">
+
+  <!-- Toast Container -->
+  <div id="toast-container" class="fixed bottom-6 right-6 z-50 flex flex-col gap-2 max-w-sm pointer-events-none"></div>
+
+  <!-- Auth Modal -->
+  <div th:replace="~{fragments/auth-modal :: authModal}"></div>
+
+  <!-- Cart Drawer -->
+  <div th:replace="~{fragments/cart-drawer :: cartDrawer}"></div>
+
+  <!-- Navbar (Solid) -->
+  <div th:replace="~{fragments/navbar :: navbar(false)}"></div>
+
+  <!-- Breadcrumbs -->
+  <div class="bg-white border-b border-gray-100 py-3">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-xs font-semibold text-gray-500 flex items-center gap-2">
+      <a href="/" class="hover:text-rose-600">Home</a>
+      <span>/</span>
+      <span class="text-gray-400">Bengaluru</span>
+      <span>/</span>
+      <span class="text-gray-900" th:text="${restaurant.name}"></span>
+    </div>
+  </div>
+
+  <!-- Main Container -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+
+    <!-- Restaurant Header Card -->
+    <div class="bg-white rounded-3xl p-6 sm:p-8 shadow-xs border border-gray-100 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+      <div class="flex-1">
+        <div class="flex items-center gap-3">
+          <h1 class="text-3xl sm:text-4xl font-black text-gray-900 brand-font" th:text="${restaurant.name}"></h1>
+          <span th:if="${restaurant.isPureVeg}" class="bg-emerald-100 text-emerald-800 text-xs font-black px-2.5 py-1 rounded-md uppercase">Pure Veg</span>
+        </div>
+        
+        <p class="text-sm text-gray-500 font-medium mt-1" th:text="${restaurant.cuisines}"></p>
+        <p class="text-xs text-gray-400 mt-1 flex items-center gap-1.5">
+          <svg class="w-3.5 h-3.5 text-gray-400" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/></svg>
+          <span th:text="${restaurant.address}"></span>
+        </p>
+
+        <!-- Stats Chips -->
+        <div class="flex flex-wrap items-center gap-4 mt-4 pt-4 border-t border-gray-100 text-xs font-bold text-gray-700">
+          <div class="flex items-center gap-1.5">
+            <span class="bg-emerald-600 text-white text-xs px-2 py-0.5 rounded-md flex items-center gap-1">
+              <span th:text="${restaurant.rating}"></span> ★
+            </span>
+            <span class="text-gray-400" th:text="${restaurant.totalReviews}"></span>
+          </div>
+          <span>•</span>
+          <div class="flex items-center gap-1">
+            <span>⏱️</span>
+            <span th:text="${restaurant.deliveryTimeMin} + ' MINS DELIVERY'"></span>
+          </div>
+          <span>•</span>
+          <div>
+            <span th:text="'₹' + ${restaurant.priceForTwo} + ' for two'"></span>
+          </div>
+        </div>
+
+        <!-- Offer Highlight -->
+        <div th:if="${restaurant.discountBadge != null}" class="mt-4 inline-flex items-center gap-2 bg-gradient-to-r from-amber-50 to-rose-50 border border-rose-200/60 text-rose-700 px-3 py-1.5 rounded-xl text-xs font-bold">
+          <span>🏷️</span>
+          <span th:text="${restaurant.discountBadge} + ' • Use code WELCOME50 on checkout'"></span>
+        </div>
+      </div>
+
+      <!-- Restaurant Hero Photo -->
+      <div class="w-full md:w-72 h-44 rounded-2xl overflow-hidden shadow-md flex-shrink-0">
+        <img th:src="${restaurant.imageUrl}" th:alt="${restaurant.name}" class="w-full h-full object-cover">
+      </div>
+    </div>
+
+    <!-- Category Section Tabs & Menu -->
+    <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
+      
+      <!-- Category Nav Sidebar (Desktop) -->
+      <div class="hidden lg:block lg:col-span-1">
+        <div class="sticky top-28 bg-white rounded-2xl p-4 border border-gray-100 shadow-xs space-y-1 text-sm font-bold">
+          <h4 class="text-xs uppercase tracking-wider text-gray-400 px-3 py-2">Menu Sections</h4>
+          <div th:each="entry : ${menuByCategory}">
+            <a th:href="'#cat-' + ${#strings.replace(entry.key, ' ', '-')}" 
+               class="block px-3 py-2 rounded-xl text-gray-700 hover:text-rose-600 hover:bg-rose-50 transition-colors flex items-center justify-between">
+              <span th:text="${entry.key}"></span>
+              <span class="text-xs text-gray-400 font-semibold" th:text="${entry.value.size()}"></span>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Menu Items Feed -->
+      <div class="lg:col-span-3 space-y-10">
+        
+        <div th:each="entry : ${menuByCategory}" th:id="'cat-' + ${#strings.replace(entry.key, ' ', '-')}" class="space-y-4">
+          
+          <div class="flex items-center gap-3 pb-2 border-b border-gray-200">
+            <h3 class="text-xl font-extrabold text-gray-900 brand-font" th:text="${entry.key}"></h3>
+            <span class="text-xs bg-gray-200 text-gray-700 px-2 py-0.5 rounded-full font-bold" th:text="${entry.value.size()}"></span>
+          </div>
+
+          <!-- Dishes in Category -->
+          <div class="grid grid-cols-1 gap-4">
+            <div th:each="dish : ${entry.value}" 
+                 class="bg-white rounded-2xl p-5 border border-gray-100 shadow-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5 hover:border-gray-200 transition-all">
+              
+              <!-- Dish Details -->
+              <div class="flex-1">
+                <div class="flex items-center gap-2 mb-1.5">
+                  <div th:class="${dish.veg} ? 'veg-badge' : 'nonveg-badge'"></div>
+                  <span th:if="${dish.bestseller}" class="text-[10px] font-black uppercase tracking-wider bg-amber-100 text-amber-800 px-2 py-0.5 rounded">
+                    ★ Bestseller
+                  </span>
+                </div>
+                
+                <h4 class="text-base font-extrabold text-gray-900" th:text="${dish.name}"></h4>
+                <div class="text-sm font-black text-gray-800 mt-1" th:text="'₹' + ${dish.price}"></div>
+                <p class="text-xs text-gray-500 mt-1 line-clamp-2 max-w-lg" th:text="${dish.description}"></p>
+              </div>
+
+              <!-- Dish Image & Add Button -->
+              <div class="relative w-full sm:w-36 h-28 sm:h-28 rounded-xl overflow-hidden flex-shrink-0 bg-gray-100">
+                <img th:if="${dish.imageUrl != null}" th:src="${dish.imageUrl}" th:alt="${dish.name}" class="w-full h-full object-cover">
+                
+                <!-- Add Button Overlay -->
+                <div class="absolute bottom-2 left-1/2 transform -translate-x-1/2 w-28">
+                  <button th:onclick="'CartStore.addItem({id: ' + ${dish.id} + ', name: \'' + ${#strings.escapeJavaScript(dish.name)} + '\', price: ' + ${dish.price} + ', isVeg: ' + ${dish.veg} + ', imageUrl: \'' + ${dish.imageUrl} + '\'}, \'' + ${#strings.escapeJavaScript(restaurant.name)} + '\', ' + ${restaurant.id} + '); showToast(\'Added ' + ${#strings.escapeJavaScript(dish.name)} + ' to cart!\');'" 
+                          class="w-full py-1.5 bg-white hover:bg-rose-50 text-rose-600 border border-gray-200 hover:border-rose-300 font-extrabold text-xs uppercase tracking-wider rounded-lg shadow-md transition-all active:scale-95 flex items-center justify-center gap-1">
+                    <span>+ ADD</span>
+                  </button>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- Sticky Bottom Cart Alert (shown when cart has items) -->
+  <div x-data="{ count: 0, total: 0 }" 
+       x-init="
+         window.addEventListener('cart-updated', (e) => { count = e.detail.count; total = e.detail.total; });
+         if (window.CartStore) { count = CartStore.getTotalCount(); total = CartStore.getTotal(); }
+       "
+       x-show="count > 0" 
+       x-cloak
+       class="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-40 w-11/12 max-w-xl">
+    <div class="bg-gray-900 text-white p-4 rounded-2xl shadow-2xl flex items-center justify-between border border-gray-800">
+      <div>
+        <span class="text-xs uppercase font-extrabold tracking-wider text-rose-400 block" x-text="count + ' ITEMS IN CART'"></span>
+        <span class="text-lg font-black" x-text="'₹' + total + ' plus taxes'"></span>
+      </div>
+      <div class="flex items-center gap-3">
+        <button @click="$dispatch('open-cart')" class="text-xs font-bold px-3 py-2 bg-gray-800 hover:bg-gray-700 rounded-xl transition-colors">
+          View Cart
+        </button>
+        <a href="/checkout" class="px-5 py-2 bg-rose-600 hover:bg-rose-700 text-white font-black text-sm rounded-xl shadow-md transition-all">
+          Checkout →
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Global Footer -->
+  <div th:replace="~{fragments/footer :: footer}"></div>
+
+  <!-- Scripts -->
+  <script th:src="@{/js/cart.js}"></script>
+  <script th:src="@{/js/app.js}"></script>
+</body>
+</html>
