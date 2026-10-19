@@ -1,4 +1,8 @@
-/* Custom Styles for RasoiRush Food Delivery */
+/* Custom Styles for Live For Food Delivery */
+
+[x-cloak] {
+  display: none !important;
+}
 
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;600;700;800;900&display=swap');
 

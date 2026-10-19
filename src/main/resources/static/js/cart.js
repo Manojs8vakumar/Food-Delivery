@@ -1,4 +1,4 @@
-// Global Cart Store for RasoiRush Food Delivery
+// Global Cart Store for Live For Food Delivery
 
 const CartStore = {
   items: [],
@@ -9,7 +9,7 @@ const CartStore = {
 
   init() {
     try {
-      const saved = localStorage.getItem('rasoirush_cart');
+      const saved = localStorage.getItem('liveforfood_cart') || localStorage.getItem('rasoirush_cart');
       if (saved) {
         const parsed = JSON.parse(saved);
         this.items = parsed.items || [];
@@ -26,7 +26,7 @@ const CartStore = {
 
   save() {
     try {
-      localStorage.setItem('rasoirush_cart', JSON.stringify({
+      localStorage.setItem('liveforfood_cart', JSON.stringify({
         items: this.items,
         restaurantName: this.restaurantName,
         restaurantId: this.restaurantId,

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>RasoiRush - Discover the best food & drinks in Bengaluru</title>
+  <title>Live For Food - Discover the best food & drinks in Bengaluru</title>
   
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -34,7 +34,7 @@
     [x-cloak] { display: none !important; }
   </style>
 </head>
-<body class="bg-gray-50 text-gray-900 antialiased" x-data="liveSearchComponent()">
+<body class="bg-gray-50 text-gray-900 antialiased" x-data="foodHubApp()">
 
   <!-- Toast Container -->
   <div id="toast-container" class="fixed bottom-6 right-6 z-50 flex flex-col gap-2 max-w-sm pointer-events-none"></div>
@@ -56,7 +56,7 @@
       
       <!-- Logo Typography -->
       <h1 class="text-5xl sm:text-6xl lg:text-7xl font-black tracking-tight brand-font drop-shadow-md">
-        rasoi<span class="text-rose-500">rush</span>
+        Live <span class="text-rose-500">For Food</span>
       </h1>
       
       <p class="mt-4 text-lg sm:text-2xl font-medium text-gray-200 tracking-wide drop-shadow">
@@ -68,17 +68,31 @@
         <div class="bg-white rounded-2xl shadow-2xl p-2 sm:p-2.5 flex flex-col sm:flex-row items-center gap-2 text-gray-800 border border-white/20">
           
           <!-- Left: Location Dropdown / Pin -->
-          <div class="flex items-center gap-2.5 px-3 py-1.5 w-full sm:w-56 text-left flex-shrink-0 cursor-pointer border-b sm:border-b-0 sm:border-r border-gray-200">
-            <svg class="w-5 h-5 text-rose-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-              <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/>
-            </svg>
-            <div class="flex-1 truncate">
-              <span class="block text-xs font-semibold text-gray-400 uppercase tracking-wider">Location</span>
-              <span class="text-sm font-bold text-gray-800">Bengaluru, KA</span>
+          <div class="relative w-full sm:w-56" @click.away="cityDropdownHero = false">
+            <div @click="cityDropdownHero = !cityDropdownHero" 
+                 class="flex items-center gap-2.5 px-3 py-1.5 w-full text-left flex-shrink-0 cursor-pointer border-b sm:border-b-0 sm:border-r border-gray-200 select-none">
+              <svg class="w-5 h-5 text-rose-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/>
+              </svg>
+              <div class="flex-1 truncate">
+                <span class="block text-xs font-semibold text-gray-400 uppercase tracking-wider">Location</span>
+                <span class="text-sm font-bold text-gray-800" x-text="selectedCity + ', KA'">Bengaluru, KA</span>
+              </div>
+              <svg class="w-4 h-4 text-gray-400 transition-transform duration-200" :class="cityDropdownHero ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+              </svg>
             </div>
-            <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-            </svg>
+
+            <!-- Dropdown Menu -->
+            <div x-show="cityDropdownHero" 
+                 x-cloak
+                 x-transition
+                 class="absolute left-0 mt-2 w-48 bg-white text-gray-900 rounded-xl shadow-xl border border-gray-100 py-1 z-50 text-sm">
+              <button type="button" @click="selectedCity = 'Bengaluru'; cityDropdownHero = false; window.dispatchEvent(new CustomEvent('city-changed', {detail: 'Bengaluru'}))" class="w-full text-left px-4 py-2 hover:bg-rose-50 hover:text-rose-600 font-medium">Bengaluru</button>
+              <button type="button" @click="selectedCity = 'Mumbai'; cityDropdownHero = false; window.dispatchEvent(new CustomEvent('city-changed', {detail: 'Mumbai'}))" class="w-full text-left px-4 py-2 hover:bg-rose-50 hover:text-rose-600 font-medium">Mumbai</button>
+              <button type="button" @click="selectedCity = 'Delhi NCR'; cityDropdownHero = false; window.dispatchEvent(new CustomEvent('city-changed', {detail: 'Delhi NCR'}))" class="w-full text-left px-4 py-2 hover:bg-rose-50 hover:text-rose-600 font-medium">Delhi NCR</button>
+              <button type="button" @click="selectedCity = 'Hyderabad'; cityDropdownHero = false; window.dispatchEvent(new CustomEvent('city-changed', {detail: 'Hyderabad'}))" class="w-full text-left px-4 py-2 hover:bg-rose-50 hover:text-rose-600 font-medium">Hyderabad</button>
+            </div>
           </div>
 
           <!-- Right: Search Input with Live Suggestions -->
@@ -91,11 +105,12 @@
                    @input.debounce.300ms="fetchSuggestions()" 
                    @keydown.escape="resultsOpen = false"
                    placeholder="Search for restaurant, cuisine or a dish..." 
-                   th:value="${searchQuery}"
                    class="w-full text-sm sm:text-base font-medium text-gray-800 placeholder-gray-400 bg-transparent focus:outline-none">
             
-            <button th:if="${searchQuery != null and !searchQuery.isEmpty()}" 
-                    onclick="window.location.href='/'"
+            <button type="button"
+                    x-show="query.length > 0 || searchQuery.length > 0" 
+                    x-cloak
+                    @click="query = ''; searchQuery = ''; resultsOpen = false"
                     class="text-xs text-gray-400 hover:text-gray-600 font-bold px-2 py-1 bg-gray-100 rounded-md">
               Clear
             </button>
@@ -106,14 +121,15 @@
         <!-- ==================== LIVE SEARCH AUTOCOMPLETE DROPDOWN ==================== -->
         <div x-show="resultsOpen" 
              @click.away="resultsOpen = false" 
+             x-cloak
              x-transition 
              class="absolute left-0 right-0 mt-2 bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden text-left z-50 text-gray-800">
           
           <!-- Restaurants Results -->
-          <template x-if="restaurants.length > 0">
+          <template x-if="searchRestaurants.length > 0">
             <div class="p-3 border-b border-gray-100">
               <div class="text-[11px] font-extrabold text-gray-400 uppercase tracking-wider px-3 py-1">Restaurants</div>
-              <template x-for="r in restaurants" :key="r.id">
+              <template x-for="r in searchRestaurants" :key="r.id">
                 <a :href="'/restaurant/' + r.slug" class="flex items-center gap-3 p-2.5 rounded-xl hover:bg-rose-50/70 transition-colors">
                   <img :src="r.image" class="w-10 h-10 rounded-lg object-cover">
                   <div class="flex-1">
@@ -129,10 +145,10 @@
           </template>
 
           <!-- Dishes Results -->
-          <template x-if="dishes.length > 0">
+          <template x-if="searchDishes.length > 0">
             <div class="p-3">
               <div class="text-[11px] font-extrabold text-gray-400 uppercase tracking-wider px-3 py-1">Dishes</div>
-              <template x-for="d in dishes" :key="d.id">
+              <template x-for="d in searchDishes" :key="d.id">
                 <a :href="'/restaurant/' + d.restaurantSlug" class="flex items-center justify-between p-2.5 rounded-xl hover:bg-rose-50/70 transition-colors">
                   <div class="flex items-center gap-2.5">
                     <div :class="d.isVeg ? 'veg-badge' : 'nonveg-badge'"></div>
@@ -164,49 +180,55 @@
       <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
         
         <!-- Card 1: Order Online -->
-        <a th:href="@{/(mode='delivery')}" 
-           class="group relative rounded-3xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 bg-white"
-           th:classappend="${currentMode == 'delivery'} ? 'ring-2 ring-rose-500 shadow-md' : ''">
+        <button type="button"
+           @click="setMode('delivery')" 
+           class="group text-left relative rounded-3xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 bg-white cursor-pointer"
+           :class="currentMode === 'delivery' ? 'ring-2 ring-rose-500 shadow-md' : ''">
           <div class="h-44 w-full overflow-hidden">
             <img src="https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=600&q=80" 
                  alt="Order Online" 
                  class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
           </div>
           <div class="p-5">
-            <h3 class="text-xl font-extrabold text-gray-900 group-hover:text-rose-600 transition-colors">Order Online</h3>
+            <h3 class="text-xl font-extrabold text-gray-900 group-hover:text-rose-600 transition-colors"
+                :class="currentMode === 'delivery' ? 'text-rose-600' : ''">Order Online</h3>
             <p class="text-sm text-gray-500 mt-1">Stay home and order to your doorstep</p>
           </div>
-        </a>
+        </button>
 
         <!-- Card 2: Dining Out -->
-        <a th:href="@{/(mode='dining')}" 
-           class="group relative rounded-3xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 bg-white"
-           th:classappend="${currentMode == 'dining'} ? 'ring-2 ring-rose-500 shadow-md' : ''">
+        <button type="button"
+           @click="setMode('dining')" 
+           class="group text-left relative rounded-3xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 bg-white cursor-pointer"
+           :class="currentMode === 'dining' ? 'ring-2 ring-rose-500 shadow-md' : ''">
           <div class="h-44 w-full overflow-hidden">
             <img src="https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=600&q=80" 
                  alt="Dining Out" 
                  class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
           </div>
           <div class="p-5">
-            <h3 class="text-xl font-extrabold text-gray-900 group-hover:text-rose-600 transition-colors">Dining</h3>
+            <h3 class="text-xl font-extrabold text-gray-900 group-hover:text-rose-600 transition-colors"
+                :class="currentMode === 'dining' ? 'text-rose-600' : ''">Dining</h3>
             <p class="text-sm text-gray-500 mt-1">View the city's favourite dining venues</p>
           </div>
-        </a>
+        </button>
 
         <!-- Card 3: Nightlife and Clubs -->
-        <a th:href="@{/(mode='nightlife')}" 
-           class="group relative rounded-3xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 bg-white"
-           th:classappend="${currentMode == 'nightlife'} ? 'ring-2 ring-rose-500 shadow-md' : ''">
+        <button type="button"
+           @click="setMode('nightlife')" 
+           class="group text-left relative rounded-3xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 bg-white cursor-pointer"
+           :class="currentMode === 'nightlife' ? 'ring-2 ring-rose-500 shadow-md' : ''">
           <div class="h-44 w-full overflow-hidden">
             <img src="https://images.unsplash.com/photo-1566417713940-fe7c737a9ef2?w=600&q=80" 
                  alt="Nightlife and Clubs" 
                  class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
           </div>
           <div class="p-5">
-            <h3 class="text-xl font-extrabold text-gray-900 group-hover:text-rose-600 transition-colors">Nightlife and Clubs</h3>
+            <h3 class="text-xl font-extrabold text-gray-900 group-hover:text-rose-600 transition-colors"
+                :class="currentMode === 'nightlife' ? 'text-rose-600' : ''">Nightlife and Clubs</h3>
             <p class="text-sm text-gray-500 mt-1">Explore the city's top nightlife outlets</p>
           </div>
-        </a>
+        </button>
 
       </div>
     </section>
@@ -219,10 +241,10 @@
           <p class="text-sm text-gray-500 mt-0.5">Top trending dishes ordered near you</p>
         </div>
         <div class="hidden sm:flex gap-2">
-          <button onclick="document.getElementById('cat-scroll').scrollBy({left: -240, behavior: 'smooth'})" class="p-2 rounded-full border border-gray-200 hover:bg-gray-100 transition-colors">
+          <button type="button" onclick="document.getElementById('cat-scroll').scrollBy({left: -240, behavior: 'smooth'})" class="p-2 rounded-full border border-gray-200 hover:bg-gray-100 transition-colors cursor-pointer">
             <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
           </button>
-          <button onclick="document.getElementById('cat-scroll').scrollBy({left: 240, behavior: 'smooth'})" class="p-2 rounded-full border border-gray-200 hover:bg-gray-100 transition-colors">
+          <button type="button" onclick="document.getElementById('cat-scroll').scrollBy({left: 240, behavior: 'smooth'})" class="p-2 rounded-full border border-gray-200 hover:bg-gray-100 transition-colors cursor-pointer">
             <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
           </button>
         </div>
@@ -231,12 +253,17 @@
       <!-- Scrollable Category Row -->
       <div id="cat-scroll" class="flex gap-8 overflow-x-auto no-scrollbar py-2">
         <div th:each="cat : ${categories}" class="flex-shrink-0 text-center category-item">
-          <a th:href="@{/(category=${cat.name})}" class="block group">
-            <div class="w-24 h-24 sm:w-28 sm:h-28 rounded-full overflow-hidden shadow-md group-hover:shadow-xl border-2 border-transparent group-hover:border-rose-500 transition-all p-0.5">
+          <button type="button" 
+                  th:attr="@click=|toggleCategory('${cat.name}')|"
+                  class="block group cursor-pointer focus:outline-none">
+            <div class="w-24 h-24 sm:w-28 sm:h-28 rounded-full overflow-hidden shadow-md group-hover:shadow-xl border-2 transition-all p-0.5"
+                 th:attr=":class=|selectedCategory === '${cat.name}' ? 'border-rose-500 ring-2 ring-rose-500 shadow-lg scale-105' : 'border-transparent group-hover:border-rose-400'|">
               <img th:src="${cat.imageUrl}" th:alt="${cat.name}" class="w-full h-full object-cover rounded-full">
             </div>
-            <span class="block mt-3 text-sm font-bold text-gray-800 group-hover:text-rose-600 transition-colors" th:text="${cat.name}">Biryani</span>
-          </a>
+            <span class="block mt-3 text-sm font-bold transition-colors"
+                  th:attr=":class=|selectedCategory === '${cat.name}' ? 'text-rose-600 font-extrabold' : 'text-gray-800 group-hover:text-rose-600'|" 
+                  th:text="${cat.name}">Biryani</span>
+          </button>
         </div>
       </div>
     </section>
@@ -247,106 +274,136 @@
       <!-- Section Header & Filter Pills -->
       <div class="flex flex-col md:flex-row md:items-center justify-between pb-6 gap-4">
         <div>
-          <h2 class="text-2xl sm:text-3xl font-black text-gray-900 brand-font">
-            <span th:if="${selectedCategory != null and !selectedCategory.isEmpty()}" th:text="'Top ' + ${selectedCategory} + ' in Bengaluru'"></span>
-            <span th:if="${selectedCategory == null or selectedCategory.isEmpty()}">
-              <span th:text="${currentMode == 'dining'} ? 'Best Dining Venues in Bengaluru' : (${currentMode == 'nightlife'} ? 'Top Nightlife Outlets in Bengaluru' : 'Top Delivery Restaurants in Bengaluru')"></span>
-            </span>
+          <h2 class="text-2xl sm:text-3xl font-black text-gray-900 brand-font"
+              x-text="selectedCategory ? ('Top ' + selectedCategory + ' in ' + selectedCity) : (currentMode === 'dining' ? ('Best Dining Venues in ' + selectedCity) : (currentMode === 'nightlife' ? ('Top Nightlife Outlets in ' + selectedCity) : ('Top Delivery Restaurants in ' + selectedCity)))">
+            Top Delivery Restaurants in Bengaluru
           </h2>
-          <p class="text-sm text-gray-500 mt-1" th:text="${restaurants.size()} + ' places delivering great food to your table'"></p>
+          <p class="text-sm text-gray-500 mt-1" 
+             x-text="filteredRestaurants.length + ' places delivering great food to your table'"></p>
         </div>
 
         <!-- Filter Buttons -->
         <div class="flex flex-wrap items-center gap-2.5 text-xs font-semibold">
-          <a th:href="@{/(mode=${currentMode}, vegOnly=${!vegOnly})}" 
-             class="px-3.5 py-2 rounded-xl border transition-all flex items-center gap-1.5"
-             th:classappend="${vegOnly} ? 'bg-emerald-600 text-white border-emerald-600 shadow-sm' : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50'">
+          <button type="button"
+                  @click="vegOnly = !vegOnly" 
+                  class="px-3.5 py-2 rounded-xl border transition-all flex items-center gap-1.5 cursor-pointer"
+                  :class="vegOnly ? 'bg-emerald-600 text-white border-emerald-600 shadow-sm' : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50'">
             <div class="veg-badge !w-3 !h-3"></div>
-            Pure Veg
-          </a>
+            <span>Pure Veg</span>
+          </button>
 
-          <a th:href="@{/(mode=${currentMode}, rating4Plus=${!rating4Plus})}" 
-             class="px-3.5 py-2 rounded-xl border transition-all flex items-center gap-1"
-             th:classappend="${rating4Plus} ? 'bg-amber-500 text-white border-amber-500 shadow-sm' : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50'">
-            ★ Rating 4.0+
-          </a>
+          <button type="button"
+                  @click="rating4Plus = !rating4Plus" 
+                  class="px-3.5 py-2 rounded-xl border transition-all flex items-center gap-1 cursor-pointer"
+                  :class="rating4Plus ? 'bg-amber-500 text-white border-amber-500 shadow-sm' : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50'">
+            <span>★ Rating 4.0+</span>
+          </button>
 
-          <a th:href="@{/(mode=${currentMode})}" 
-             class="px-3.5 py-2 rounded-xl border bg-white text-gray-700 border-gray-200 hover:bg-gray-50 transition-all">
-            ⚡ Fast Delivery
-          </a>
+          <button type="button"
+                  @click="fastDelivery = !fastDelivery" 
+                  class="px-3.5 py-2 rounded-xl border transition-all flex items-center gap-1 cursor-pointer"
+                  :class="fastDelivery ? 'bg-rose-600 text-white border-rose-600 shadow-sm' : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50'">
+            <span>⚡ Fast Delivery</span>
+          </button>
+
+          <button type="button"
+                  x-show="vegOnly || rating4Plus || fastDelivery || selectedCategory || searchQuery"
+                  x-cloak
+                  @click="clearAllFilters()" 
+                  class="px-3.5 py-2 rounded-xl border border-rose-200 bg-rose-50 text-rose-600 hover:bg-rose-100 transition-all font-bold cursor-pointer">
+            ✕ Clear All
+          </button>
         </div>
       </div>
 
+      <!-- Loading Skeleton -->
+      <div x-show="loading" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-7">
+        <template x-for="i in 6" :key="i">
+          <div class="bg-white rounded-3xl overflow-hidden border border-gray-100 shadow-sm animate-pulse">
+            <div class="h-52 bg-gray-200"></div>
+            <div class="p-5 space-y-3">
+              <div class="h-5 bg-gray-200 rounded w-3/4"></div>
+              <div class="h-3 bg-gray-200 rounded w-1/2"></div>
+              <div class="h-8 bg-gray-200 rounded mt-4"></div>
+            </div>
+          </div>
+        </template>
+      </div>
+
       <!-- No Restaurants Found State -->
-      <div th:if="${restaurants.isEmpty()}" class="bg-white rounded-3xl p-12 text-center border border-gray-200 my-6">
+      <div x-show="!loading && filteredRestaurants.length === 0" x-cloak class="bg-white rounded-3xl p-12 text-center border border-gray-200 my-6">
         <div class="w-20 h-20 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center text-gray-400">
           <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
         </div>
         <h3 class="text-xl font-bold text-gray-800">No restaurants match your filters</h3>
         <p class="text-sm text-gray-500 mt-1">Try clearing some filters or searching for another dish or cuisine.</p>
-        <a href="/" class="mt-4 inline-block px-5 py-2.5 bg-rose-600 text-white font-bold text-sm rounded-xl">Clear Filters</a>
+        <button type="button" @click="clearAllFilters()" class="mt-4 inline-block px-5 py-2.5 bg-rose-600 text-white font-bold text-sm rounded-xl hover:bg-rose-700 transition-colors cursor-pointer">Clear Filters</button>
       </div>
 
       <!-- ==================== RESTAURANT CARDS GRID ==================== -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-7">
-        <div th:each="r : ${restaurants}" class="bg-white rounded-3xl overflow-hidden border border-gray-100 shadow-sm restaurant-card flex flex-col justify-between">
-          
-          <!-- Image & Badges Container -->
-          <a th:href="@{'/restaurant/' + ${r.slug}}" class="block relative h-52 overflow-hidden group">
-            <img th:src="${r.imageUrl}" th:alt="${r.name}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+      <div x-show="!loading && filteredRestaurants.length > 0" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-7">
+        <template x-for="r in filteredRestaurants" :key="r.id">
+          <div class="bg-white rounded-3xl overflow-hidden border border-gray-100 shadow-sm restaurant-card flex flex-col justify-between">
             
-            <!-- Discount Badge Overlay -->
-            <div th:if="${r.discountBadge != null}" 
-                 class="absolute bottom-3 left-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-[11px] font-extrabold uppercase px-2.5 py-1 rounded-md shadow-md tracking-wider">
-              <span th:text="${r.discountBadge}"></span>
-            </div>
-
-            <!-- Delivery Time Chip -->
-            <div class="absolute bottom-3 right-3 bg-white/95 backdrop-blur-xs text-gray-900 text-xs font-black px-2.5 py-1 rounded-md shadow-sm">
-              <span th:text="${r.deliveryTimeMin} + ' MINS'"></span>
-            </div>
-
-            <!-- Pure Veg Ribbon -->
-            <div th:if="${r.isPureVeg}" class="absolute top-3 left-3 bg-emerald-600 text-white text-[10px] font-black uppercase px-2 py-0.5 rounded shadow">
-              PURE VEG
-            </div>
-          </a>
-
-          <!-- Details Body -->
-          <div class="p-5 flex-1 flex flex-col justify-between">
-            <div>
-              <div class="flex items-start justify-between gap-2">
-                <a th:href="@{'/restaurant/' + ${r.slug}}">
-                  <h3 class="text-lg font-black text-gray-900 hover:text-rose-600 transition-colors leading-tight" th:text="${r.name}"></h3>
-                </a>
-                <span class="bg-emerald-600 text-white text-xs font-black px-2 py-0.5 rounded-lg flex items-center gap-1 flex-shrink-0">
-                  <span th:text="${r.rating}">4.5</span>
-                  <span>★</span>
-                </span>
-              </div>
-
-              <p class="text-xs text-gray-500 font-medium mt-1 truncate" th:text="${r.cuisines}"></p>
+            <!-- Image & Badges Container -->
+            <a :href="'/restaurant/' + r.slug" class="block relative h-52 overflow-hidden group">
+              <img :src="r.imageUrl" :alt="r.name" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
               
-              <div class="flex items-center justify-between text-xs text-gray-400 mt-3 pt-3 border-t border-gray-100">
-                <span class="truncate" th:text="${r.area}">Indiranagar</span>
-                <span class="font-semibold text-gray-700" th:text="'₹' + ${r.priceForTwo} + ' for two'"></span>
-              </div>
-            </div>
+              <!-- Discount Badge Overlay -->
+              <template x-if="r.discountBadge">
+                <div class="absolute bottom-3 left-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-[11px] font-extrabold uppercase px-2.5 py-1 rounded-md shadow-md tracking-wider"
+                     x-text="r.discountBadge">
+                </div>
+              </template>
 
-            <!-- Action CTA -->
-            <div class="mt-4 pt-3 flex items-center justify-between gap-3">
-              <a th:href="@{'/restaurant/' + ${r.slug}}" class="flex-1 text-center py-2.5 px-4 bg-gray-50 hover:bg-rose-50 text-gray-700 hover:text-rose-600 text-xs font-bold rounded-xl border border-gray-200 hover:border-rose-300 transition-all">
-                View Menu
-              </a>
-              <button th:onclick="'window.location.href=\'/restaurant/' + ${r.slug} + '\''" class="py-2.5 px-4 bg-rose-600 hover:bg-rose-700 text-white text-xs font-extrabold rounded-xl shadow-md shadow-rose-600/20 transition-all">
-                Order
-              </button>
+              <!-- Delivery Time Chip -->
+              <div class="absolute bottom-3 right-3 bg-white/95 backdrop-blur-xs text-gray-900 text-xs font-black px-2.5 py-1 rounded-md shadow-sm"
+                   x-text="r.deliveryTimeMin + ' MINS'">
+              </div>
+
+              <!-- Pure Veg Ribbon -->
+              <template x-if="r.pureVeg || r.isPureVeg">
+                <div class="absolute top-3 left-3 bg-emerald-600 text-white text-[10px] font-black uppercase px-2 py-0.5 rounded shadow">
+                  PURE VEG
+                </div>
+              </template>
+            </a>
+
+            <!-- Details Body -->
+            <div class="p-5 flex-1 flex flex-col justify-between">
+              <div>
+                <div class="flex items-start justify-between gap-2">
+                  <a :href="'/restaurant/' + r.slug">
+                    <h3 class="text-lg font-black text-gray-900 hover:text-rose-600 transition-colors leading-tight" x-text="r.name"></h3>
+                  </a>
+                  <span class="bg-emerald-600 text-white text-xs font-black px-2 py-0.5 rounded-lg flex items-center gap-1 flex-shrink-0">
+                    <span x-text="r.rating">4.5</span>
+                    <span>★</span>
+                  </span>
+                </div>
+
+                <p class="text-xs text-gray-500 font-medium mt-1 truncate" x-text="r.cuisines"></p>
+                
+                <div class="flex items-center justify-between text-xs text-gray-400 mt-3 pt-3 border-t border-gray-100">
+                  <span class="truncate" x-text="r.area">Indiranagar</span>
+                  <span class="font-semibold text-gray-700" x-text="'₹' + r.priceForTwo + ' for two'"></span>
+                </div>
+              </div>
+
+              <!-- Action CTA -->
+              <div class="mt-4 pt-3 flex items-center justify-between gap-3">
+                <a :href="'/restaurant/' + r.slug" class="flex-1 text-center py-2.5 px-4 bg-gray-50 hover:bg-rose-50 text-gray-700 hover:text-rose-600 text-xs font-bold rounded-xl border border-gray-200 hover:border-rose-300 transition-all">
+                  View Menu
+                </a>
+                <a :href="'/restaurant/' + r.slug" class="py-2.5 px-4 bg-rose-600 hover:bg-rose-700 text-white text-xs font-extrabold rounded-xl shadow-md shadow-rose-600/20 transition-all">
+                  Order
+                </a>
+              </div>
+
             </div>
 
           </div>
-
-        </div>
+        </template>
       </div>
 
     </section>

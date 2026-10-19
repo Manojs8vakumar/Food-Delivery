@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <launchConfiguration type="org.eclipse.jdt.launching.localJavaApplication">
     <listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_PATHS">
-        <listEntry value="/food-delivery/src/main/java/com/example/demo/DemoApplication.java"/>
+        <listEntry value="/live-for-food/src/main/java/com/example/demo/DemoApplication.java"/>
     </listAttribute>
     <listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_TYPES">
         <listEntry value="1"/>
@@ -12,7 +12,7 @@
     <booleanAttribute key="org.eclipse.jdt.launching.ATTR_USE_CLASSPATH_ONLY_JAR" value="false"/>
     <stringAttribute key="org.eclipse.jdt.launching.CLASSPATH_PROVIDER" value="org.eclipse.m2e.launchconfig.classpathProvider"/>
     <stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="com.example.demo.DemoApplication"/>
-    <stringAttribute key="org.eclipse.jdt.launching.MODULE_NAME" value="food-delivery"/>
-    <stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="food-delivery"/>
+    <stringAttribute key="org.eclipse.jdt.launching.MODULE_NAME" value="live-for-food"/>
+    <stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="live-for-food"/>
     <stringAttribute key="org.eclipse.jdt.launching.SOURCE_PATH_PROVIDER" value="org.eclipse.m2e.launchconfig.sourcepathProvider"/>
 </launchConfiguration>

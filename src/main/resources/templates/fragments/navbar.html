@@ -35,17 +35,18 @@
             </div>
             <div>
               <span class="text-2xl font-black tracking-tight brand-font block leading-none">
-                rasoi<span class="text-rose-500">rush</span>
+                Live <span class="text-rose-500">For Food</span>
               </span>
-              <span class="text-[10px] uppercase font-bold tracking-widest opacity-80">Live For Food</span>
+              <span class="text-[10px] uppercase font-bold tracking-widest opacity-80">Food & Drinks Delivery</span>
             </div>
           </a>
 
           <!-- City Selector Badge -->
-          <div class="hidden md:block relative">
-            <button @click="cityDropdown = !cityDropdown" 
+          <div class="hidden md:block relative" @click.away="cityDropdown = false">
+            <button type="button" 
+                    @click.stop="cityDropdown = !cityDropdown" 
                     :class="(![(${isTransparent})] || scrolled) ? 'bg-gray-100 text-gray-700 hover:bg-gray-200' : 'bg-white/15 text-white hover:bg-white/25'"
-                    class="px-3 py-1.5 rounded-full text-xs font-semibold flex items-center gap-1.5 transition-colors">
+                    class="px-3 py-1.5 rounded-full text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer">
               <svg class="w-3.5 h-3.5 text-rose-500" fill="currentColor" viewBox="0 0 20 20">
                 <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/>
               </svg>
@@ -57,13 +58,13 @@
 
             <!-- Dropdown Menu -->
             <div x-show="cityDropdown" 
-                 @click.away="cityDropdown = false" 
+                 x-cloak
                  x-transition
                  class="absolute left-0 mt-2 w-48 bg-white text-gray-900 rounded-xl shadow-xl border border-gray-100 py-1 z-50 text-sm">
-              <a href="#" @click.prevent="selectedCity = 'Bengaluru'; cityDropdown = false" class="block px-4 py-2 hover:bg-rose-50 hover:text-rose-600 font-medium">Bengaluru</a>
-              <a href="#" @click.prevent="selectedCity = 'Mumbai'; cityDropdown = false" class="block px-4 py-2 hover:bg-rose-50 hover:text-rose-600 font-medium">Mumbai</a>
-              <a href="#" @click.prevent="selectedCity = 'Delhi NCR'; cityDropdown = false" class="block px-4 py-2 hover:bg-rose-50 hover:text-rose-600 font-medium">Delhi NCR</a>
-              <a href="#" @click.prevent="selectedCity = 'Hyderabad'; cityDropdown = false" class="block px-4 py-2 hover:bg-rose-50 hover:text-rose-600 font-medium">Hyderabad</a>
+              <button type="button" @click="selectedCity = 'Bengaluru'; cityDropdown = false; window.dispatchEvent(new CustomEvent('city-changed', {detail: 'Bengaluru'}))" class="w-full text-left px-4 py-2 hover:bg-rose-50 hover:text-rose-600 font-medium">Bengaluru</button>
+              <button type="button" @click="selectedCity = 'Mumbai'; cityDropdown = false; window.dispatchEvent(new CustomEvent('city-changed', {detail: 'Mumbai'}))" class="w-full text-left px-4 py-2 hover:bg-rose-50 hover:text-rose-600 font-medium">Mumbai</button>
+              <button type="button" @click="selectedCity = 'Delhi NCR'; cityDropdown = false; window.dispatchEvent(new CustomEvent('city-changed', {detail: 'Delhi NCR'}))" class="w-full text-left px-4 py-2 hover:bg-rose-50 hover:text-rose-600 font-medium">Delhi NCR</button>
+              <button type="button" @click="selectedCity = 'Hyderabad'; cityDropdown = false; window.dispatchEvent(new CustomEvent('city-changed', {detail: 'Hyderabad'}))" class="w-full text-left px-4 py-2 hover:bg-rose-50 hover:text-rose-600 font-medium">Hyderabad</button>
             </div>
           </div>
         </div>

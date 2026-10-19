@@ -24,12 +24,12 @@ public class OrderService {
                             String paymentMethod, String restaurantName, Long restaurantId,
                             List<OrderItem> items, BigDecimal discount) {
         Order order = new Order();
-        order.setOrderNumber("RR-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase());
+        order.setOrderNumber("LFF-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase());
         order.setCustomerName(customerName != null && !customerName.isBlank() ? customerName : "Manoj Kumar");
         order.setCustomerPhone(customerPhone != null && !customerPhone.isBlank() ? customerPhone : "+91 98765 43210");
         order.setDeliveryAddress(address != null && !address.isBlank() ? address : "Flat 402, Green Glen Layout, Bellandur, Bengaluru");
         order.setPaymentMethod(paymentMethod != null ? paymentMethod : "UPI (Google Pay / PhonePe)");
-        order.setRestaurantName(restaurantName != null ? restaurantName : "RasoiRush Partner");
+        order.setRestaurantName(restaurantName != null ? restaurantName : "Live For Food Partner");
         order.setRestaurantId(restaurantId);
 
         BigDecimal subtotal = BigDecimal.ZERO;

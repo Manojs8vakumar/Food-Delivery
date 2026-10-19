@@ -39,6 +39,7 @@ public class Restaurant {
     private boolean isNightlife;
 
     @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @com.fasterxml.jackson.annotation.JsonIgnore
     private List<MenuItem> menuItems = new ArrayList<>();
 
     public Restaurant() {

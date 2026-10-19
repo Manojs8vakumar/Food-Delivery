@@ -29,6 +29,11 @@ public class ApiController {
         this.orderService = orderService;
     }
 
+    @GetMapping("/restaurants")
+    public ResponseEntity<List<Restaurant>> getAllRestaurants() {
+        return ResponseEntity.ok(restaurantRepository.findAll());
+    }
+
     @GetMapping("/search/suggestions")
     public ResponseEntity<Map<String, Object>> searchSuggestions(@RequestParam("q") String query) {
         Map<String, Object> result = new HashMap<>();
