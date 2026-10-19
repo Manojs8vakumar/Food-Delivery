@@ -24,3 +24,10 @@ replay_pid*
 # OS generated files
 .DS_Store
 Thumbs.db
+
+# Frontend Dependencies & Build Output
+froentend/node_modules/
+froentend/dist/
+froentend/dist-ssr/
+*.local
+
