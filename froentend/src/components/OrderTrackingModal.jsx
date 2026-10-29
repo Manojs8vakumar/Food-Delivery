@@ -79,7 +79,7 @@ export default function OrderTrackingModal({ order, onClose, onOrderAgain }) {
         {/* Header */}
         <div className="tracking-modal-header">
           <div>
-            <div className="order-id-badge">ORDER #ZOM-{Math.floor(100000 + Math.random() * 900000)}</div>
+            <div className="order-id-badge">ORDER #CRV-{Math.floor(100000 + Math.random() * 900000)}</div>
             <h2 className="tracking-title">
               {currentStep === 4 ? 'Order Delivered 🎉' : 'Live Order Tracking'}
             </h2>

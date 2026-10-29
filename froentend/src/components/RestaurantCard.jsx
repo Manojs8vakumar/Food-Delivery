@@ -102,7 +102,7 @@ export default function RestaurantCard({
           )}
         </div>
 
-        {/* Row 4: Zomato Gold Offer Strip */}
+        {/* Row 4: Crave Gold Offer Strip */}
         {restaurant.goldOffer && (
           <div className="gold-offer-strip">
             <Sparkles size={13} className="gold-icon" />

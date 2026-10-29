@@ -23,7 +23,7 @@ export default function AuthModal({ isOpen, mode = 'login', onClose, onLoginSucc
       onLoginSuccess({
         name: name || (phone ? `User-${phone.slice(-4)}` : 'Gourmet Foodie'),
         phone: `+91 ${phone}`,
-        email: 'user@zomato-demo.com'
+        email: 'user@cravefoodie-demo.com'
       });
       onClose();
     }
@@ -153,7 +153,7 @@ export default function AuthModal({ isOpen, mode = 'login', onClose, onLoginSucc
         <div className="auth-switch-mode">
           {currentMode === 'login' ? (
             <p>
-              New to Zomato?{' '}
+              New to Crave Foodie?{' '}
               <button 
                 type="button" 
                 className="switch-mode-btn"

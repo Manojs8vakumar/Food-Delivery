@@ -56,7 +56,7 @@ export default function CartDrawer({
       onApplyCoupon(found);
       setCouponInput('');
     } else {
-      alert('Invalid coupon code. Try ZOMATO50 or TASTY20');
+      alert('Invalid coupon code. Try CRAVE50 or TASTY20');
     }
   };
 

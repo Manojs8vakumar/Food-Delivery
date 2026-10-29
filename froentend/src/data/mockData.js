@@ -678,7 +678,7 @@ export const restaurants = [
 
 export const coupons = [
   {
-    code: 'ZOMATO50',
+    code: 'CRAVE50',
     title: '50% OFF up to ₹100',
     minOrder: 199,
     discountPercent: 50,
@@ -707,6 +707,6 @@ export const coupons = [
     minOrder: 100,
     discountPercent: 10,
     maxDiscount: 50,
-    description: 'Exclusive Zomato Gold offer'
+    description: 'Exclusive Crave Foodie Gold offer'
   }
 ];

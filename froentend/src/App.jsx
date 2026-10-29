@@ -18,12 +18,12 @@ import { restaurants as initialRestaurants, locations } from './data/mockData';
 export default function App() {
   // Theme State: 'light' | 'dark'
   const [theme, setTheme] = useState(() => {
-    return localStorage.getItem('zomato_theme') || 'light';
+    return localStorage.getItem('crave_theme') || 'light';
   });
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
-    localStorage.setItem('zomato_theme', theme);
+    localStorage.setItem('crave_theme', theme);
   }, [theme]);
 
   const toggleTheme = () => {
@@ -53,25 +53,25 @@ export default function App() {
 
   // User State
   const [user, setUser] = useState(() => {
-    const saved = localStorage.getItem('zomato_user');
+    const saved = localStorage.getItem('crave_user');
     return saved ? JSON.parse(saved) : null;
   });
 
   const handleLoginSuccess = (userData) => {
     setUser(userData);
-    localStorage.setItem('zomato_user', JSON.stringify(userData));
+    localStorage.setItem('crave_user', JSON.stringify(userData));
     showToast(`Welcome back, ${userData.name}!`, 'success');
   };
 
   const handleLogout = () => {
     setUser(null);
-    localStorage.removeItem('zomato_user');
+    localStorage.removeItem('crave_user');
     showToast('Logged out successfully', 'info');
   };
 
   // Wishlist / Favorites
   const [favorites, setFavorites] = useState(() => {
-    const saved = localStorage.getItem('zomato_favs');
+    const saved = localStorage.getItem('crave_favs');
     return saved ? JSON.parse(saved) : [1, 2];
   });
 
@@ -79,7 +79,7 @@ export default function App() {
     setFavorites(prev => {
       const exists = prev.includes(restaurantId);
       const updated = exists ? prev.filter(id => id !== restaurantId) : [...prev, restaurantId];
-      localStorage.setItem('zomato_favs', JSON.stringify(updated));
+      localStorage.setItem('crave_favs', JSON.stringify(updated));
       showToast(exists ? 'Removed from favorites' : 'Added to favorites', 'info');
       return updated;
     });
@@ -87,12 +87,12 @@ export default function App() {
 
   // Cart State
   const [cart, setCart] = useState(() => {
-    const saved = localStorage.getItem('zomato_cart');
+    const saved = localStorage.getItem('crave_cart');
     return saved ? JSON.parse(saved) : { restaurant: null, items: [] };
   });
 
   useEffect(() => {
-    localStorage.setItem('zomato_cart', JSON.stringify(cart));
+    localStorage.setItem('crave_cart', JSON.stringify(cart));
   }, [cart]);
 
   const [appliedCoupon, setAppliedCoupon] = useState(null);
@@ -311,7 +311,7 @@ export default function App() {
       {/* Anchor for Smooth Scrolling from Hero */}
       <div id="browse-section"></div>
 
-      {/* Zomato Signature Category Switcher Tabs */}
+      {/* Signature Category Switcher Tabs */}
       <CategoryTabs 
         activeTab={activeTab} 
         setActiveTab={setActiveTab} 

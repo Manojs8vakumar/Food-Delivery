@@ -146,7 +146,7 @@ export default function HeroBanner({
           
           {/* Main Hero Branding */}
           <div className="hero-brand-header">
-            <h1 className="hero-zomato-logo">zomato</h1>
+            <h1 className="hero-zomato-logo">crave foodie</h1>
             <p className="hero-tagline">
               Discover the best food & drinks in <strong>{selectedLocation.name.split(',')[0]}</strong>
             </p>

@@ -1,13 +1,13 @@
-# Food Delivery Frontend (Zomato Clone)
+# Food Delivery Frontend (Crave Foodie)
 
-A modern, responsive, and feature-packed frontend for a food delivery platform inspired by **Zomato**, built using **HTML5, CSS3, and React 18**. Includes complete **Dark Mode** and **Light Mode** support with live state persistence.
+A modern, responsive, and feature-packed frontend for a food delivery platform **Crave Foodie**, built using **HTML5, CSS3, and React 18**. Includes complete **Dark Mode** and **Light Mode** support with live state persistence.
 
 ---
 
 ## 🌟 Key Features
 
 ### 1. 🌓 Dark & Light Mode
-- Signature Zomato styling in both Light mode (clean crimson and white) and Dark mode (deep OLED dark `#121214` and `#1c1c22`).
+- Premium styling in both Light mode (clean crimson and white) and Dark mode (deep OLED dark `#121214` and `#1c1c22`).
 - Seamless toggle switch in the navbar with animated Sun & Moon icons.
 - Automatic theme persistence via `localStorage`.
 
@@ -16,7 +16,7 @@ A modern, responsive, and feature-packed frontend for a food delivery platform i
   - **Location selector**: Choose from major cities and localities (Connaught Place, Indiranagar, Bandra West, Jubilee Hills, etc.).
   - **Live Search**: Instant search matching restaurant names, cuisines, and dish items.
 
-### 3. 🛵 Signature Zomato Navigation Tabs
+### 3. 🛵 Signature Navigation Tabs
 - **Delivery** (scooter icon with signature red highlight)
 - **Dining Out** (fork & knife icon)
 - **Nightlife** (cocktail icon)
@@ -36,14 +36,14 @@ A modern, responsive, and feature-packed frontend for a food delivery platform i
 - **Sort By**: Relevance, Rating: High to Low, Delivery Time, Cost: Low to High, Cost: High to Low.
 
 ### 7. 🏪 Restaurant Cards & Menu Modal
-- Discount tags (e.g. `50% OFF up to ₹100`), delivery time badges, safety verified badges, and **Zomato Gold** offer ribbons.
+- Discount tags (e.g. `50% OFF up to ₹100`), delivery time badges, safety verified badges, and **Crave Gold** offer ribbons.
 - Favorite heart toggle button.
 - Detailed restaurant menu modal with dish descriptions, high-resolution imagery, bestseller tags, Veg/Non-Veg indicators, and interactive `[-] [count] [+]` quantity steppers.
 
 ### 8. 🛒 Interactive Cart Drawer & Promo Codes
 - Slide-over cart drawer with live calculations.
 - Promo codes with instant discount application:
-  - `ZOMATO50`: 50% OFF up to ₹100
+  - `CRAVE50`: 50% OFF up to ₹100
   - `TASTY20`: 20% OFF up to ₹150
   - `FREEDEL`: Free delivery
   - `GOLD10`: Extra 10% Gold discount
@@ -93,7 +93,7 @@ Food Delivery/
             ├── CartDrawer.jsx          # Slide-out cart with promos & bill summary
             ├── OrderTrackingModal.jsx  # Live order simulation modal
             ├── AuthModal.jsx           # Login/Signup & Demo authentication
-            ├── Footer.jsx              # Zomato footer with links & app badges
+            ├── Footer.jsx              # Footer with links & app badges
             └── Toast.jsx               # Feedback notifications
 ```
 

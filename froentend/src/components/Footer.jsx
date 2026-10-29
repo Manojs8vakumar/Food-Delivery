@@ -9,7 +9,7 @@ export default function Footer() {
         {/* Top Branding & Selectors */}
         <div className="footer-top-row">
           <div className="footer-brand">
-            <span className="brand-text">zomato</span>
+            <span className="brand-text">crave foodie</span>
             <span className="brand-dot"></span>
           </div>
 
@@ -31,7 +31,7 @@ export default function Footer() {
         <div className="footer-links-grid">
           
           <div className="footer-column">
-            <h4>ABOUT ZOMATO</h4>
+            <h4>ABOUT CRAVE FOODIE</h4>
             <ul>
               <li><a href="#about">Who We Are</a></li>
               <li><a href="#blog">Blog</a></li>
@@ -44,14 +44,14 @@ export default function Footer() {
           </div>
 
           <div className="footer-column">
-            <h4>ZOMAVERSE</h4>
+            <h4>CRAVE FOODIE UNIVERSE</h4>
             <ul>
-              <li><a href="#zomato">Zomato</a></li>
+              <li><a href="#cravefoodie">Crave Foodie</a></li>
               <li><a href="#blinkit">Blinkit</a></li>
               <li><a href="#feeding">Feeding India</a></li>
               <li><a href="#hyperpure">Hyperpure</a></li>
-              <li><a href="#zomlive">Zomato Live</a></li>
-              <li><a href="#zomaland">Zomaland</a></li>
+              <li><a href="#cravelive">Crave Foodie Live</a></li>
+              <li><a href="#zomaland">Foodie Land</a></li>
               <li><a href="#weather">Weather Union</a></li>
             </ul>
           </div>
@@ -64,7 +64,7 @@ export default function Footer() {
             </ul>
             <h4 style={{ marginTop: '24px' }}>FOR ENTERPRISES</h4>
             <ul>
-              <li><a href="#enterprise">Zomato For Enterprise</a></li>
+              <li><a href="#enterprise">Crave Foodie For Enterprise</a></li>
             </ul>
           </div>
 
@@ -111,7 +111,7 @@ export default function Footer() {
         {/* Bottom Copyright & Disclaimer */}
         <div className="footer-bottom-copy">
           <p>
-            By continuing past this page, you agree to our Terms of Service, Cookie Policy, Privacy Policy and Content Policies. All trademarks are properties of their respective owners. 2008-2026 © Zomato™ Ltd. All rights reserved.
+            By continuing past this page, you agree to our Terms of Service, Cookie Policy, Privacy Policy and Content Policies. All trademarks are properties of their respective owners. 2008-2026 © Crave Foodie™ Ltd. All rights reserved.
           </p>
         </div>
 

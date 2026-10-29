@@ -46,7 +46,7 @@ export default function Navbar({
           {/* Brand Logo */}
           <div className="navbar-brand-section">
             <a href="#" className="brand-logo" onClick={(e) => { e.preventDefault(); setSearchQuery(''); }}>
-              <span className="brand-text">zomato</span>
+              <span className="brand-text">crave foodie</span>
               <span className="brand-dot"></span>
             </a>
           </div>
@@ -187,7 +187,7 @@ export default function Navbar({
                       <p className="user-email-text">{user.phone || user.email}</p>
                       <div className="gold-member-badge">
                         <ShieldCheck size={14} />
-                        <span>Zomato Gold Active</span>
+                        <span>Crave Foodie Gold Active</span>
                       </div>
                     </div>
                     <div className="user-dropdown-divider"></div>
