@@ -1,13 +1,18 @@
 import React, { useState } from 'react';
-import { SlidersHorizontal, Star, Zap, Percent, ArrowUpDown, X, Check } from 'lucide-react';
+import { SlidersHorizontal, Star, Zap, Percent, ArrowUpDown, X, Check, Heart } from 'lucide-react';
 
 export default function FilterBar({
   filters,
   setFilters,
   sortBy,
   setSortBy,
+  costRange,
+  setCostRange,
+  favoritesOnly,
+  setFavoritesOnly,
   activeFilterCount,
-  onResetFilters
+  onResetFilters,
+  onOpenAdvancedFilters
 }) {
   const [showSortDropdown, setShowSortDropdown] = useState(false);
 
@@ -30,11 +35,11 @@ export default function FilterBar({
     <div className="filter-bar-container">
       <div className="filter-pills-row">
         
-        {/* Filters Summary / Indicator */}
+        {/* Advanced Filters Button */}
         <button 
-          className={`filter-pill ${activeFilterCount > 0 ? 'active' : ''}`}
-          onClick={onResetFilters}
-          title={activeFilterCount > 0 ? "Click to reset filters" : "All filters active"}
+          className={`filter-pill filter-primary-btn ${activeFilterCount > 0 ? 'active' : ''}`}
+          onClick={onOpenAdvancedFilters}
+          title="Open advanced filter options"
         >
           <SlidersHorizontal size={14} />
           <span>Filters</span>
@@ -43,7 +48,7 @@ export default function FilterBar({
           )}
         </button>
 
-        {/* Rating 4.0+ */}
+        {/* Rating 4.0+ Toggle */}
         <button 
           className={`filter-pill ${filters.rating4Plus ? 'active' : ''}`}
           onClick={() => toggleFilter('rating4Plus')}
@@ -52,7 +57,7 @@ export default function FilterBar({
           <span>Rating: 4.0+</span>
         </button>
 
-        {/* Pure Veg */}
+        {/* Pure Veg Toggle */}
         <button 
           className={`filter-pill ${filters.pureVeg ? 'active' : ''}`}
           onClick={() => toggleFilter('pureVeg')}
@@ -79,6 +84,16 @@ export default function FilterBar({
         >
           <Percent size={14} />
           <span>Great Offers</span>
+        </button>
+
+        {/* Favorites Only Toggle */}
+        <button 
+          className={`filter-pill ${favoritesOnly ? 'active' : ''}`}
+          onClick={() => setFavoritesOnly(!favoritesOnly)}
+          title="Show only bookmarked favorite places"
+        >
+          <Heart size={14} className={favoritesOnly ? 'fill-heart' : ''} fill={favoritesOnly ? '#e23744' : 'none'} color={favoritesOnly ? '#e23744' : 'currentColor'} />
+          <span>Favorites</span>
         </button>
 
         {/* Sort Dropdown */}
@@ -112,7 +127,7 @@ export default function FilterBar({
 
         {/* Clear All Filters Button */}
         {activeFilterCount > 0 && (
-          <button className="clear-all-pill" onClick={onResetFilters}>
+          <button className="clear-all-pill" onClick={onResetFilters} title="Reset all filters">
             <X size={14} />
             <span>Clear all</span>
           </button>

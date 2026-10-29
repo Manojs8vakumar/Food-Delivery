@@ -203,6 +203,11 @@ export default function HeroBanner({
                 placeholder="Search for fiery dum biryani, restaurant, cuisine or dish..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    scrollToContent();
+                  }
+                }}
               />
               {searchQuery && (
                 <button 

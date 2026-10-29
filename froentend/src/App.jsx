@@ -12,6 +12,7 @@ import AuthModal from './components/AuthModal';
 import Footer from './components/Footer';
 import Toast from './components/Toast';
 import HeroBanner from './components/HeroBanner';
+import AdvancedFilterModal from './components/AdvancedFilterModal';
 
 import { restaurants as initialRestaurants, locations } from './data/mockData';
 
@@ -49,7 +50,10 @@ export default function App() {
     offersOnly: false
   });
 
+  const [favoritesOnly, setFavoritesOnly] = useState(false);
+  const [costRange, setCostRange] = useState('all');
   const [sortBy, setSortBy] = useState('relevance');
+  const [isAdvancedFilterOpen, setIsAdvancedFilterOpen] = useState(false);
 
   // User State
   const [user, setUser] = useState(() => {
@@ -72,7 +76,7 @@ export default function App() {
   // Wishlist / Favorites
   const [favorites, setFavorites] = useState(() => {
     const saved = localStorage.getItem('crave_favs');
-    return saved ? JSON.parse(saved) : [1, 2];
+    return saved ? JSON.parse(saved) : [1, 2, 4];
   });
 
   const toggleFavorite = (restaurantId) => {
@@ -113,15 +117,20 @@ export default function App() {
     }, 3500);
   };
 
+  const scrollToContent = () => {
+    const el = document.getElementById('browse-section');
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
   // Cart Handlers
   const handleAddToCart = (restaurant, item) => {
     setCart(prev => {
-      // Check if item belongs to same restaurant
       if (prev.restaurant && prev.restaurant.id !== restaurant.id && prev.items.length > 0) {
         if (!window.confirm(`Your cart already contains dishes from ${prev.restaurant.name}. Would you like to reset your cart to add items from ${restaurant.name}?`)) {
           return prev;
         }
-        // User agreed to reset
         return {
           restaurant,
           items: [{ ...item, quantity: 1 }]
@@ -184,11 +193,13 @@ export default function App() {
     if (filters.pureVeg) count++;
     if (filters.fastDelivery) count++;
     if (filters.offersOnly) count++;
+    if (favoritesOnly) count++;
+    if (costRange !== 'all') count++;
     if (selectedFoodCategory) count++;
     if (selectedBrand) count++;
     if (sortBy !== 'relevance') count++;
     return count;
-  }, [filters, selectedFoodCategory, selectedBrand, sortBy]);
+  }, [filters, favoritesOnly, costRange, selectedFoodCategory, selectedBrand, sortBy]);
 
   const handleResetFilters = () => {
     setFilters({
@@ -197,6 +208,8 @@ export default function App() {
       fastDelivery: false,
       offersOnly: false
     });
+    setFavoritesOnly(false);
+    setCostRange('all');
     setSelectedFoodCategory(null);
     setSelectedBrand(null);
     setSortBy('relevance');
@@ -207,26 +220,46 @@ export default function App() {
   const filteredRestaurants = useMemo(() => {
     let result = [...initialRestaurants];
 
-    // Search query filter
+    // 1. Service Type filter (Delivery, Dining Out, Nightlife)
+    if (activeTab) {
+      result = result.filter(r => {
+        if (Array.isArray(r.serviceTypes)) {
+          return r.serviceTypes.includes(activeTab);
+        }
+        return r.serviceType === activeTab;
+      });
+    }
+
+    // 2. City / Location filter
+    if (selectedLocation && selectedLocation.id !== 'all') {
+      result = result.filter(r => r.cityId === selectedLocation.id);
+    }
+
+    // 3. Search query filter
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase().trim();
       result = result.filter(r => 
         r.name.toLowerCase().includes(q) ||
+        r.address.toLowerCase().includes(q) ||
         r.cuisines.some(c => c.toLowerCase().includes(q)) ||
-        r.menu.some(m => m.name.toLowerCase().includes(q) || m.category.toLowerCase().includes(q))
+        (r.menu && r.menu.some(m => 
+          m.name.toLowerCase().includes(q) || 
+          m.category.toLowerCase().includes(q) ||
+          (m.description && m.description.toLowerCase().includes(q))
+        ))
       );
     }
 
-    // Inspiration category filter
+    // 4. Food Inspiration category filter
     if (selectedFoodCategory) {
       const cat = selectedFoodCategory.toLowerCase();
       result = result.filter(r => 
         r.cuisines.some(c => c.toLowerCase().includes(cat)) ||
-        r.menu.some(m => m.name.toLowerCase().includes(cat) || m.category.toLowerCase().includes(cat))
+        (r.menu && r.menu.some(m => m.name.toLowerCase().includes(cat) || m.category.toLowerCase().includes(cat)))
       );
     }
 
-    // Brand filter
+    // 5. Brand filter
     if (selectedBrand) {
       result = result.filter(r => 
         r.name.toLowerCase().includes(selectedBrand.toLowerCase()) ||
@@ -234,30 +267,44 @@ export default function App() {
       );
     }
 
-    // Rating 4.0+
+    // 6. Rating 4.0+
     if (filters.rating4Plus) {
       result = result.filter(r => r.rating >= 4.0);
     }
 
-    // Pure Veg
+    // 7. Pure Veg
     if (filters.pureVeg) {
       result = result.filter(r => r.isVeg);
     }
 
-    // Fast Delivery (< 30 mins)
+    // 8. Fast Delivery (<30 mins)
     if (filters.fastDelivery) {
       result = result.filter(r => {
         const mins = parseInt(r.deliveryTime);
-        return !isNaN(mins) && mins <= 25;
+        return !isNaN(mins) && mins <= 30;
       });
     }
 
-    // Offers Only
+    // 9. Offers Only
     if (filters.offersOnly) {
-      result = result.filter(r => Boolean(r.discount));
+      result = result.filter(r => Boolean(r.discount || r.goldOffer));
     }
 
-    // Sorting
+    // 10. Favorites Only
+    if (favoritesOnly) {
+      result = result.filter(r => favorites.includes(r.id));
+    }
+
+    // 11. Cost Range
+    if (costRange === 'under250') {
+      result = result.filter(r => r.costForOne < 250);
+    } else if (costRange === '250to500') {
+      result = result.filter(r => r.costForOne >= 250 && r.costForOne <= 500);
+    } else if (costRange === 'above500') {
+      result = result.filter(r => r.costForOne > 500);
+    }
+
+    // 12. Sorting
     if (sortBy === 'rating') {
       result.sort((a, b) => b.rating - a.rating);
     } else if (sortBy === 'deliveryTime') {
@@ -269,7 +316,7 @@ export default function App() {
     }
 
     return result;
-  }, [searchQuery, selectedFoodCategory, selectedBrand, filters, sortBy]);
+  }, [activeTab, selectedLocation, searchQuery, selectedFoodCategory, selectedBrand, filters, favoritesOnly, costRange, sortBy, favorites]);
 
   const totalCartCount = cart.items.reduce((acc, i) => acc + i.quantity, 0);
   const totalCartPrice = cart.items.reduce((acc, i) => acc + (i.price * i.quantity), 0);
@@ -297,6 +344,22 @@ export default function App() {
         setSearchQuery={setSearchQuery}
         selectedLocation={selectedLocation}
         setSelectedLocation={setSelectedLocation}
+        onSelectRestaurant={(restaurant) => setSelectedRestaurant(restaurant)}
+        onShowFavorites={() => {
+          setFavoritesOnly(true);
+          scrollToContent();
+        }}
+        onOpenPastOrders={() => {
+          if (activeOrder) {
+            // Already an active order exists
+          } else {
+            showToast('Showing your live delivery tracking status', 'info');
+            setActiveOrder({
+              restaurant: initialRestaurants[0],
+              items: initialRestaurants[0].menu.slice(0, 2)
+            });
+          }
+        }}
       />
 
       {/* Hero Banner with Fiery Smoke Biryani GIF Background */}
@@ -305,7 +368,10 @@ export default function App() {
         setSelectedLocation={setSelectedLocation}
         searchQuery={searchQuery}
         setSearchQuery={setSearchQuery}
-        onSelectCuisine={(cuisine) => setSearchQuery(cuisine)}
+        onSelectCuisine={(cuisine) => {
+          setSearchQuery(cuisine);
+          scrollToContent();
+        }}
       />
 
       {/* Anchor for Smooth Scrolling from Hero */}
@@ -314,7 +380,11 @@ export default function App() {
       {/* Signature Category Switcher Tabs */}
       <CategoryTabs 
         activeTab={activeTab} 
-        setActiveTab={setActiveTab} 
+        setActiveTab={(tab) => {
+          setActiveTab(tab);
+          // Auto scroll to list when tab switched
+          scrollToContent();
+        }} 
       />
 
       {/* Main Body Content */}
@@ -326,6 +396,7 @@ export default function App() {
             selectedFoodCategory={selectedFoodCategory}
             onSelectCategory={(categoryTag) => {
               setSelectedFoodCategory(prev => prev === categoryTag ? null : categoryTag);
+              scrollToContent();
             }}
           />
 
@@ -334,6 +405,7 @@ export default function App() {
             selectedBrand={selectedBrand}
             onSelectBrand={(brandName) => {
               setSelectedBrand(prev => prev === brandName ? null : brandName);
+              scrollToContent();
             }}
           />
 
@@ -343,22 +415,47 @@ export default function App() {
             setFilters={setFilters}
             sortBy={sortBy}
             setSortBy={setSortBy}
+            costRange={costRange}
+            setCostRange={setCostRange}
+            favoritesOnly={favoritesOnly}
+            setFavoritesOnly={setFavoritesOnly}
             activeFilterCount={activeFilterCount}
             onResetFilters={handleResetFilters}
+            onOpenAdvancedFilters={() => setIsAdvancedFilterOpen(true)}
           />
 
           {/* Restaurant Grid */}
           <RestaurantList
             restaurants={filteredRestaurants}
             locationName={selectedLocation.name.split(',')[0]}
+            activeTab={activeTab}
             onSelectRestaurant={(restaurant) => setSelectedRestaurant(restaurant)}
             favorites={favorites}
             onToggleFavorite={toggleFavorite}
             onResetFilters={handleResetFilters}
+            searchQuery={searchQuery}
+            favoritesOnly={favoritesOnly}
+            activeFilterCount={activeFilterCount}
           />
 
         </div>
       </main>
+
+      {/* Advanced Filter Modal */}
+      <AdvancedFilterModal
+        isOpen={isAdvancedFilterOpen}
+        onClose={() => setIsAdvancedFilterOpen(false)}
+        filters={filters}
+        setFilters={setFilters}
+        sortBy={sortBy}
+        setSortBy={setSortBy}
+        costRange={costRange}
+        setCostRange={setCostRange}
+        favoritesOnly={favoritesOnly}
+        setFavoritesOnly={setFavoritesOnly}
+        onResetFilters={handleResetFilters}
+        matchCount={filteredRestaurants.length}
+      />
 
       {/* Restaurant Menu Modal */}
       {selectedRestaurant && (

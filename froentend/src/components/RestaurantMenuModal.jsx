@@ -7,9 +7,10 @@ import {
   Sparkles, 
   Plus, 
   Minus, 
-  Info,
+  Search,
   CheckCircle2,
-  ChevronRight
+  ChevronRight,
+  Utensils
 } from 'lucide-react';
 
 export default function RestaurantMenuModal({
@@ -23,17 +24,25 @@ export default function RestaurantMenuModal({
   const [vegOnly, setVegOnly] = useState(false);
   const [bestsellerOnly, setBestsellerOnly] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState('All');
+  const [dishSearch, setDishSearch] = useState('');
 
   if (!restaurant) return null;
 
   // Extract unique categories from menu
-  const categories = ['All', ...new Set(restaurant.menu.map(item => item.category))];
+  const categories = ['All', ...new Set((restaurant.menu || []).map(item => item.category))];
 
   // Filter items
-  const filteredMenuItems = restaurant.menu.filter(item => {
+  const filteredMenuItems = (restaurant.menu || []).filter(item => {
     if (vegOnly && !item.isVeg) return false;
     if (bestsellerOnly && !item.isBestseller) return false;
     if (selectedCategory !== 'All' && item.category !== selectedCategory) return false;
+    if (dishSearch.trim()) {
+      const dq = dishSearch.toLowerCase().trim();
+      const matchName = item.name.toLowerCase().includes(dq);
+      const matchCat = item.category.toLowerCase().includes(dq);
+      const matchDesc = item.description && item.description.toLowerCase().includes(dq);
+      if (!matchName && !matchCat && !matchDesc) return false;
+    }
     return true;
   });
 
@@ -91,7 +100,7 @@ export default function RestaurantMenuModal({
             </div>
             <div className="stat-info">
               <span className="stat-value">{restaurant.ratingCount}</span>
-              <span className="stat-sub">Delivery Ratings</span>
+              <span className="stat-sub">Ratings</span>
             </div>
           </div>
 
@@ -115,8 +124,27 @@ export default function RestaurantMenuModal({
           </div>
         </div>
 
-        {/* Filter & Category Controls */}
-        <div className="menu-nav-controls">
+        {/* In-Menu Search & Filter Row */}
+        <div className="menu-search-filter-row">
+          <div className="menu-dish-search-box">
+            <Search size={16} className="menu-search-icon" />
+            <input 
+              type="text" 
+              placeholder="Search in this restaurant's menu..."
+              value={dishSearch}
+              onChange={(e) => setDishSearch(e.target.value)}
+            />
+            {dishSearch && (
+              <button 
+                onClick={() => setDishSearch('')} 
+                className="menu-clear-search-btn"
+                title="Clear search"
+              >
+                <X size={14} />
+              </button>
+            )}
+          </div>
+
           <div className="menu-filter-toggles">
             <button 
               className={`menu-filter-btn ${vegOnly ? 'active' : ''}`}
@@ -136,113 +164,130 @@ export default function RestaurantMenuModal({
               <span>Bestsellers</span>
             </button>
           </div>
+        </div>
 
-          <div className="menu-categories-scroll">
-            {categories.map((cat) => (
-              <button
-                key={cat}
-                className={`menu-cat-pill ${selectedCategory === cat ? 'active' : ''}`}
-                onClick={() => setSelectedCategory(cat)}
-              >
-                {cat}
-              </button>
-            ))}
-          </div>
+        {/* Categories Horizontal Scroll */}
+        <div className="menu-categories-scroll">
+          {categories.map((cat) => (
+            <button
+              key={cat}
+              className={`menu-cat-pill ${selectedCategory === cat ? 'active' : ''}`}
+              onClick={() => setSelectedCategory(cat)}
+            >
+              {cat}
+            </button>
+          ))}
         </div>
 
         {/* Menu Items List */}
         <div className="menu-items-scroll-area">
           <div className="menu-items-count-header">
             <h3>Menu ({filteredMenuItems.length} dishes)</h3>
+            {dishSearch && (
+              <span className="menu-search-note">Showing results for "{dishSearch}"</span>
+            )}
           </div>
 
-          <div className="menu-items-list">
-            {filteredMenuItems.map((item) => {
-              const qty = getItemQuantity(item.id);
+          {filteredMenuItems.length === 0 ? (
+            <div className="no-dishes-view">
+              <Utensils size={36} />
+              <p>No dishes match your filter or search.</p>
+              <button 
+                className="clear-dish-filter-btn"
+                onClick={() => { setVegOnly(false); setBestsellerOnly(false); setSelectedCategory('All'); setDishSearch(''); }}
+              >
+                Reset Menu Filters
+              </button>
+            </div>
+          ) : (
+            <div className="menu-items-list">
+              {filteredMenuItems.map((item) => {
+                const qty = getItemQuantity(item.id);
 
-              return (
-                <div key={item.id} className="menu-dish-card">
-                  <div className="dish-details-col">
-                    <div className="dish-top-meta">
-                      {item.isVeg ? (
-                        <div className="veg-icon" title="Vegetarian">
-                          <div className="veg-dot"></div>
-                        </div>
-                      ) : (
-                        <div className="non-veg-icon" title="Non-Vegetarian">
-                          <div className="non-veg-triangle"></div>
-                        </div>
-                      )}
-
-                      {item.isBestseller && (
-                        <span className="bestseller-star-badge">
-                          <Star size={10} fill="#f5a623" color="#f5a623" />
-                          <span>Bestseller</span>
-                        </span>
-                      )}
-                    </div>
-
-                    <h4 className="dish-name">{item.name}</h4>
-                    <div className="dish-price">₹{item.price}</div>
-
-                    {item.rating && (
-                      <div className="dish-rating-line">
-                        <span className="dish-rating-badge">
-                          ★ {item.rating}
-                        </span>
-                        <span className="dish-votes">({item.votes} ratings)</span>
-                      </div>
-                    )}
-
-                    <p className="dish-description">{item.description}</p>
-                  </div>
-
-                  {/* Dish Image & Add Button */}
-                  <div className="dish-img-col">
-                    <div className="dish-img-wrapper">
-                      <img 
-                        src={item.image} 
-                        alt={item.name} 
-                        className="dish-photo" 
-                        loading="lazy" 
-                      />
-                      
-                      <div className="dish-action-container">
-                        {qty === 0 ? (
-                          <button 
-                            className="add-to-cart-btn"
-                            onClick={() => onAddToCart(restaurant, item)}
-                          >
-                            <span>ADD</span>
-                            <Plus size={14} />
-                          </button>
+                return (
+                  <div key={item.id} className="menu-dish-card">
+                    <div className="dish-details-col">
+                      <div className="dish-top-meta">
+                        {item.isVeg ? (
+                          <div className="veg-icon" title="Vegetarian">
+                            <div className="veg-dot"></div>
+                          </div>
                         ) : (
-                          <div className="quantity-stepper">
-                            <button 
-                              className="step-btn minus" 
-                              onClick={() => onUpdateCartQuantity(item.id, qty - 1)}
-                              aria-label="Decrease quantity"
-                            >
-                              <Minus size={13} />
-                            </button>
-                            <span className="step-count">{qty}</span>
-                            <button 
-                              className="step-btn plus" 
-                              onClick={() => onUpdateCartQuantity(item.id, qty + 1)}
-                              aria-label="Increase quantity"
-                            >
-                              <Plus size={13} />
-                            </button>
+                          <div className="non-veg-icon" title="Non-Vegetarian">
+                            <div className="non-veg-triangle"></div>
                           </div>
                         )}
+
+                        {item.isBestseller && (
+                          <span className="bestseller-star-badge">
+                            <Star size={10} fill="#f5a623" color="#f5a623" />
+                            <span>Bestseller</span>
+                          </span>
+                        )}
                       </div>
+
+                      <h4 className="dish-name">{item.name}</h4>
+                      <div className="dish-price">₹{item.price}</div>
+
+                      {item.rating && (
+                        <div className="dish-rating-line">
+                          <span className="dish-rating-badge">
+                            ★ {item.rating}
+                          </span>
+                          <span className="dish-votes">({item.votes} ratings)</span>
+                        </div>
+                      )}
+
+                      <p className="dish-description">{item.description}</p>
                     </div>
-                    <span className="customisable-text">Customisable</span>
+
+                    {/* Dish Image & Add Button */}
+                    <div className="dish-img-col">
+                      <div className="dish-img-wrapper">
+                        <img 
+                          src={item.image} 
+                          alt={item.name} 
+                          className="dish-photo" 
+                          loading="lazy" 
+                        />
+                        
+                        <div className="dish-action-container">
+                          {qty === 0 ? (
+                            <button 
+                              className="add-to-cart-btn"
+                              onClick={() => onAddToCart(restaurant, item)}
+                            >
+                              <span>ADD</span>
+                              <Plus size={14} />
+                            </button>
+                          ) : (
+                            <div className="quantity-stepper">
+                              <button 
+                                className="step-btn minus" 
+                                onClick={() => onUpdateCartQuantity(item.id, qty - 1)}
+                                aria-label="Decrease quantity"
+                              >
+                                <Minus size={13} />
+                              </button>
+                              <span className="step-count">{qty}</span>
+                              <button 
+                                className="step-btn plus" 
+                                onClick={() => onUpdateCartQuantity(item.id, qty + 1)}
+                                aria-label="Increase quantity"
+                              >
+                                <Plus size={13} />
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                      <span className="customisable-text">Customisable</span>
+                    </div>
                   </div>
-                </div>
-              );
-            })}
-          </div>
+                );
+              })}
+            </div>
+          )}
         </div>
 
         {/* Sticky Bottom Cart Bar inside Modal if Cart has items */}
