@@ -14,6 +14,7 @@ import Toast from './components/Toast';
 import HeroBanner from './components/HeroBanner';
 import AdvancedFilterModal from './components/AdvancedFilterModal';
 import AdminPortal from './admin/AdminPortal';
+import AdminLogin from './admin/AdminLogin';
 
 import { restaurants as initialRestaurants, locations, coupons as initialCoupons } from './data/mockData';
 
@@ -86,6 +87,25 @@ export default function App() {
       ? 'admin' 
       : (localStorage.getItem('crave_view_mode') || 'customer');
   });
+
+  // Admin Session Authentication State
+  const [adminUser, setAdminUser] = useState(() => {
+    const saved = localStorage.getItem('crave_admin_user');
+    return saved ? JSON.parse(saved) : null;
+  });
+
+  const handleAdminLoginSuccess = (userData) => {
+    setAdminUser(userData);
+    localStorage.setItem('crave_admin_user', JSON.stringify(userData));
+    showToast(`Welcome Administrator ${userData.name}!`, 'success');
+  };
+
+  const handleAdminLogout = () => {
+    setAdminUser(null);
+    localStorage.removeItem('crave_admin_user');
+    setViewMode('customer');
+    showToast('Admin session ended. Signed out securely.', 'info');
+  };
 
   useEffect(() => {
     localStorage.setItem('crave_view_mode', viewMode);
@@ -567,8 +587,28 @@ export default function App() {
   const totalCartCount = cart.items.reduce((acc, i) => acc + i.quantity, 0);
   const totalCartPrice = cart.items.reduce((acc, i) => acc + (i.price * i.quantity), 0);
 
-  // If Admin View is active, render the dedicated Admin Portal!
+  // If Admin View is active, check authentication
   if (viewMode === 'admin') {
+    // If NOT authenticated as admin, show Admin Authentication Gate!
+    if (!adminUser) {
+      return (
+        <div className="admin-root-container">
+          <Toast 
+            message={toast.message} 
+            type={toast.type} 
+            onClose={() => setToast({ message: '', type: 'success' })} 
+          />
+          <AdminLogin
+            onLoginSuccess={handleAdminLoginSuccess}
+            onBackToStorefront={() => setViewMode('customer')}
+            theme={theme}
+            toggleTheme={toggleTheme}
+          />
+        </div>
+      );
+    }
+
+    // Authenticated Admin Portal Suite
     return (
       <div className="admin-root-container">
         {/* Toast Notification */}
@@ -593,6 +633,8 @@ export default function App() {
           onAddCoupon={handleAddCoupon}
           onDeleteCoupon={handleDeleteCoupon}
           onSwitchToCustomerView={() => setViewMode('customer')}
+          adminUser={adminUser}
+          onAdminLogout={handleAdminLogout}
           theme={theme}
           toggleTheme={toggleTheme}
         />

@@ -11,7 +11,8 @@ import {
   ShieldCheck, 
   Store,
   Layers,
-  Settings
+  Settings,
+  LogOut
 } from 'lucide-react';
 
 import AdminDashboard from './AdminDashboard';
@@ -36,6 +37,8 @@ export default function AdminPortal({
   onAddCoupon,
   onDeleteCoupon,
   onSwitchToCustomerView,
+  adminUser,
+  onAdminLogout,
   theme,
   toggleTheme
 }) {
@@ -136,7 +139,7 @@ export default function AdminPortal({
           </button>
         </nav>
 
-        {/* Sidebar Footer with Back to Storefront */}
+        {/* Sidebar Footer with Back to Storefront and Logout */}
         <div className="admin-sidebar-footer">
           <button 
             className="admin-back-storefront-btn"
@@ -145,6 +148,15 @@ export default function AdminPortal({
           >
             <Store size={16} />
             <span>Back to Storefront</span>
+          </button>
+
+          <button 
+            className="admin-logout-sidebar-btn"
+            onClick={onAdminLogout}
+            title="Sign out of Administrator Session"
+          >
+            <LogOut size={15} />
+            <span>Sign Out</span>
           </button>
         </div>
       </aside>
@@ -190,12 +202,21 @@ export default function AdminPortal({
 
             {/* Admin User Profile */}
             <div className="admin-user-profile-pill">
-              <div className="admin-avatar">AD</div>
+              <div className="admin-avatar">{adminUser?.name ? adminUser.name.slice(0, 2).toUpperCase() : 'AD'}</div>
               <div className="admin-user-info">
-                <span className="admin-user-name">Admin Officer</span>
-                <span className="admin-user-role">Super Administrator</span>
+                <span className="admin-user-name">{adminUser?.name || 'Admin Officer'}</span>
+                <span className="admin-user-role">{adminUser?.email || 'Super Administrator'}</span>
               </div>
             </div>
+
+            {/* Quick Logout Icon Button */}
+            <button 
+              onClick={onAdminLogout} 
+              className="admin-icon-btn logout"
+              title="Log Out of Admin Portal"
+            >
+              <LogOut size={16} />
+            </button>
           </div>
         </header>
 
