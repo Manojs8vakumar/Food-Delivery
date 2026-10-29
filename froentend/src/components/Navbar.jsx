@@ -31,7 +31,8 @@ export default function Navbar({
   setSelectedLocation,
   onSelectRestaurant,
   onShowFavorites,
-  onOpenPastOrders
+  onOpenPastOrders,
+  onOpenAdmin
 }) {
   const [showLocationDropdown, setShowLocationDropdown] = useState(false);
   const [showUserDropdown, setShowUserDropdown] = useState(false);
@@ -273,6 +274,16 @@ export default function Navbar({
           {/* Right Action Icons & Auth */}
           <div className="navbar-actions">
             
+            {/* Quick Admin Portal Button */}
+            <button 
+              className="storefront-admin-pill" 
+              onClick={onOpenAdmin}
+              title="Launch Crave Foodie Admin Portal"
+            >
+              <ShieldCheck size={14} className="admin-shield-icon" />
+              <span>Admin Portal</span>
+            </button>
+
             {/* Dark / Light Mode Toggle */}
             <button 
               onClick={toggleTheme} 
@@ -357,6 +368,17 @@ export default function Navbar({
                     >
                       <Clock size={16} />
                       <span>Past Orders & Live Status</span>
+                    </button>
+                    <button 
+                      className="user-dropdown-item" 
+                      onClick={() => { 
+                        setShowUserDropdown(false); 
+                        if (onOpenAdmin) onOpenAdmin(); 
+                      }}
+                      style={{ color: 'var(--zomato-red)', fontWeight: 600 }}
+                    >
+                      <ShieldCheck size={16} />
+                      <span>Admin Management Portal</span>
                     </button>
                     <div className="user-dropdown-divider"></div>
                     <button className="user-dropdown-item logout" onClick={() => { onLogout(); setShowUserDropdown(false); }}>

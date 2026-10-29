@@ -13,10 +13,117 @@ import Footer from './components/Footer';
 import Toast from './components/Toast';
 import HeroBanner from './components/HeroBanner';
 import AdvancedFilterModal from './components/AdvancedFilterModal';
+import AdminPortal from './admin/AdminPortal';
 
-import { restaurants as initialRestaurants, locations } from './data/mockData';
+import { restaurants as initialRestaurants, locations, coupons as initialCoupons } from './data/mockData';
+
+const sampleInitialOrders = [
+  {
+    id: 'CRV-894102',
+    customerName: 'Priya Sharma',
+    phone: '+91 98450 12345',
+    address: 'Flat 402, Green Glen Layout, Bellandur, Bengaluru',
+    restaurantName: 'The Royal Biryani House',
+    restaurantId: 1,
+    time: '12 mins ago',
+    total: 640,
+    status: 'out_for_delivery',
+    items: [
+      { name: 'Hyderabadi Dum Chicken Biryani', quantity: 1, price: 320 },
+      { name: 'Royal Shahi Paneer Biryani', quantity: 1, price: 280 }
+    ]
+  },
+  {
+    id: 'CRV-761294',
+    customerName: 'Rahul Verma',
+    phone: '+91 97110 56789',
+    address: 'B-12, Sector 18, Noida, Delhi NCR',
+    restaurantName: "Domino's Pizza",
+    restaurantId: 9,
+    time: '24 mins ago',
+    total: 549,
+    status: 'preparing',
+    items: [
+      { name: 'Barbecue Pepper Chicken Pizza', quantity: 1, price: 429 },
+      { name: 'Choco Lava Volcano Cake', quantity: 1, price: 129 }
+    ]
+  },
+  {
+    id: 'CRV-652901',
+    customerName: 'Ananya Deshmukh',
+    phone: '+91 99201 34567',
+    address: '14th Floor, Hiranandani Gardens, Powai, Mumbai',
+    restaurantName: 'Toit Craft Brewery & Gastro Pub',
+    restaurantId: 57,
+    time: '45 mins ago',
+    total: 830,
+    status: 'confirmed',
+    items: [
+      { name: 'Toit Tint-In-Wit Craft Wheat Beer', quantity: 1, price: 340 },
+      { name: 'Smoked Bacon & Mozzarella Pizza', quantity: 1, price: 490 }
+    ]
+  },
+  {
+    id: 'CRV-512093',
+    customerName: 'Karthik Reddy',
+    phone: '+91 98850 78901',
+    address: 'Road No 10, Jubilee Hills, Hyderabad',
+    restaurantName: 'Paradise Biryani & Kebabs',
+    restaurantId: 3,
+    time: '1 hour ago',
+    total: 420,
+    status: 'delivered',
+    items: [
+      { name: 'Special Hyderabadi Mutton Dum Biryani', quantity: 1, price: 420 }
+    ]
+  }
+];
 
 export default function App() {
+  // Current View Mode: 'customer' | 'admin'
+  const [viewMode, setViewMode] = useState(() => {
+    return window.location.hash === '#admin' 
+      ? 'admin' 
+      : (localStorage.getItem('crave_view_mode') || 'customer');
+  });
+
+  useEffect(() => {
+    localStorage.setItem('crave_view_mode', viewMode);
+    if (viewMode === 'admin') {
+      window.location.hash = '#admin';
+    } else if (window.location.hash === '#admin') {
+      window.location.hash = '';
+    }
+  }, [viewMode]);
+
+  // Master Data States (editable by Admin)
+  const [restaurantsList, setRestaurantsList] = useState(() => {
+    const saved = localStorage.getItem('crave_restaurants');
+    return saved ? JSON.parse(saved) : initialRestaurants;
+  });
+
+  useEffect(() => {
+    localStorage.setItem('crave_restaurants', JSON.stringify(restaurantsList));
+  }, [restaurantsList]);
+
+  const [ordersList, setOrdersList] = useState(() => {
+    const saved = localStorage.getItem('crave_orders');
+    return saved ? JSON.parse(saved) : sampleInitialOrders;
+  });
+
+  useEffect(() => {
+    localStorage.setItem('crave_orders', JSON.stringify(ordersList));
+  }, [ordersList]);
+
+  const [couponsList, setCouponsList] = useState(() => {
+    const saved = localStorage.getItem('crave_coupons');
+    return saved ? JSON.parse(saved) : initialCoupons;
+  });
+
+  useEffect(() => {
+    localStorage.setItem('crave_coupons', JSON.stringify(couponsList));
+  }, [couponsList]);
+
   // Theme State: 'light' | 'dark'
   const [theme, setTheme] = useState(() => {
     return localStorage.getItem('crave_theme') || 'light';
@@ -180,10 +287,149 @@ export default function App() {
 
   const handleCheckout = (orderData) => {
     setIsCartOpen(false);
-    setActiveOrder(orderData);
+    
+    const newOrderId = `CRV-${Math.floor(100000 + Math.random() * 900000)}`;
+    const newOrderPayload = {
+      id: newOrderId,
+      customerName: user?.name || 'Gourmet Foodie',
+      phone: user?.phone || '+91 98765 43210',
+      address: selectedLocation?.name || 'Connaught Place, New Delhi',
+      restaurantName: cart.restaurant?.name || 'Crave Partner Kitchen',
+      restaurantId: cart.restaurant?.id,
+      time: 'Just now',
+      total: orderData.total || cart.items.reduce((acc, i) => acc + (i.price * i.quantity), 0),
+      status: 'confirmed',
+      items: cart.items.map(i => ({ name: i.name, quantity: i.quantity, price: i.price }))
+    };
+
+    setOrdersList(prev => [newOrderPayload, ...prev]);
+    setActiveOrder(newOrderPayload);
     setCart({ restaurant: null, items: [] });
     setAppliedCoupon(null);
     showToast('Order placed successfully! Tracking live updates...', 'success');
+  };
+
+  // ==========================================
+  // ADMIN ACTIONS HANDLERS
+  // ==========================================
+  const handleAddRestaurant = (newRest) => {
+    const nextId = restaurantsList.reduce((max, r) => Math.max(max, r.id), 0) + 1;
+    const fullRestaurant = {
+      id: nextId,
+      ...newRest,
+      ratingCount: '100+',
+      safetyBadged: true,
+      banner: newRest.image,
+      menu: [
+        {
+          id: `m_${nextId}_1`,
+          name: `${newRest.name} Special Dish`,
+          category: 'Chef Specials',
+          price: Math.round(newRest.costForOne * 0.9),
+          rating: 4.8,
+          votes: 180,
+          isVeg: newRest.isVeg,
+          isBestseller: true,
+          description: 'Signature specialty prepared fresh with premium ingredients.',
+          image: newRest.image
+        }
+      ]
+    };
+
+    setRestaurantsList(prev => [fullRestaurant, ...prev]);
+    showToast(`Added "${newRest.name}" to restaurants directory!`, 'success');
+  };
+
+  const handleUpdateRestaurant = (id, updatedFields) => {
+    setRestaurantsList(prev => prev.map(r => r.id === id ? { ...r, ...updatedFields } : r));
+    showToast('Restaurant details updated successfully!', 'success');
+  };
+
+  const handleDeleteRestaurant = (id) => {
+    setRestaurantsList(prev => prev.filter(r => r.id !== id));
+    showToast('Restaurant removed from directory', 'info');
+  };
+
+  const handleAddDish = (restaurantId, newDish) => {
+    setRestaurantsList(prev => prev.map(r => {
+      if (r.id === restaurantId) {
+        const dishId = `m_${restaurantId}_${Date.now()}`;
+        return {
+          ...r,
+          menu: [...(r.menu || []), { id: dishId, ...newDish }]
+        };
+      }
+      return r;
+    }));
+    showToast(`Dish "${newDish.name}" added to menu!`, 'success');
+  };
+
+  const handleUpdateDish = (restaurantId, dishId, updatedDish) => {
+    setRestaurantsList(prev => prev.map(r => {
+      if (r.id === restaurantId) {
+        return {
+          ...r,
+          menu: (r.menu || []).map(d => d.id === dishId ? { ...d, ...updatedDish } : d)
+        };
+      }
+      return r;
+    }));
+    showToast('Dish details updated!', 'success');
+  };
+
+  const handleDeleteDish = (restaurantId, dishId) => {
+    setRestaurantsList(prev => prev.map(r => {
+      if (r.id === restaurantId) {
+        return {
+          ...r,
+          menu: (r.menu || []).filter(d => d.id !== dishId)
+        };
+      }
+      return r;
+    }));
+    showToast('Dish removed from menu', 'info');
+  };
+
+  const handleUpdateOrderStatus = (orderId, newStatus) => {
+    setOrdersList(prev => prev.map(o => o.id === orderId ? { ...o, status: newStatus } : o));
+    if (activeOrder && activeOrder.id === orderId) {
+      setActiveOrder(prev => ({ ...prev, status: newStatus }));
+    }
+    showToast(`Order #${orderId} status changed to "${newStatus.replace('_', ' ').toUpperCase()}"`, 'success');
+  };
+
+  const handleSimulateNewOrder = () => {
+    const randomRest = restaurantsList[Math.floor(Math.random() * restaurantsList.length)] || restaurantsList[0];
+    const simulatedOrderId = `CRV-${Math.floor(100000 + Math.random() * 900000)}`;
+    const randomDish = randomRest.menu?.[0] || { name: 'Chef Special Platter', price: 340 };
+
+    const simulatedOrder = {
+      id: simulatedOrderId,
+      customerName: ['Aditya Verma', 'Rohit Sen', 'Sneha Kapoor', 'Meera Nair'][Math.floor(Math.random() * 4)],
+      phone: `+91 ${Math.floor(9000000000 + Math.random() * 999999999)}`,
+      address: `${randomRest.cityId.toUpperCase()} Delivery Zone`,
+      restaurantName: randomRest.name,
+      restaurantId: randomRest.id,
+      time: 'Just now',
+      total: (randomDish.price || 300) + 40,
+      status: 'confirmed',
+      items: [
+        { name: randomDish.name, quantity: 1, price: randomDish.price || 300 }
+      ]
+    };
+
+    setOrdersList(prev => [simulatedOrder, ...prev]);
+    showToast(`🔔 New Live Order received from ${simulatedOrder.customerName}!`, 'success');
+  };
+
+  const handleAddCoupon = (newCoupon) => {
+    setCouponsList(prev => [newCoupon, ...prev]);
+    showToast(`Coupon "${newCoupon.code}" published successfully!`, 'success');
+  };
+
+  const handleDeleteCoupon = (code) => {
+    setCouponsList(prev => prev.filter(c => c.code !== code));
+    showToast(`Coupon "${code}" deleted`, 'info');
   };
 
   // Filter Computation
@@ -218,7 +464,7 @@ export default function App() {
 
   // Filtered & Sorted Restaurants
   const filteredRestaurants = useMemo(() => {
-    let result = [...initialRestaurants];
+    let result = [...restaurantsList];
 
     // 1. Service Type filter (Delivery, Dining Out, Nightlife)
     if (activeTab) {
@@ -316,11 +562,45 @@ export default function App() {
     }
 
     return result;
-  }, [activeTab, selectedLocation, searchQuery, selectedFoodCategory, selectedBrand, filters, favoritesOnly, costRange, sortBy, favorites]);
+  }, [restaurantsList, activeTab, selectedLocation, searchQuery, selectedFoodCategory, selectedBrand, filters, favoritesOnly, costRange, sortBy, favorites]);
 
   const totalCartCount = cart.items.reduce((acc, i) => acc + i.quantity, 0);
   const totalCartPrice = cart.items.reduce((acc, i) => acc + (i.price * i.quantity), 0);
 
+  // If Admin View is active, render the dedicated Admin Portal!
+  if (viewMode === 'admin') {
+    return (
+      <div className="admin-root-container">
+        {/* Toast Notification */}
+        <Toast 
+          message={toast.message} 
+          type={toast.type} 
+          onClose={() => setToast({ message: '', type: 'success' })} 
+        />
+
+        <AdminPortal
+          restaurants={restaurantsList}
+          orders={ordersList}
+          coupons={couponsList}
+          onAddRestaurant={handleAddRestaurant}
+          onUpdateRestaurant={handleUpdateRestaurant}
+          onDeleteRestaurant={handleDeleteRestaurant}
+          onAddDish={handleAddDish}
+          onUpdateDish={handleUpdateDish}
+          onDeleteDish={handleDeleteDish}
+          onUpdateOrderStatus={handleUpdateOrderStatus}
+          onSimulateNewOrder={handleSimulateNewOrder}
+          onAddCoupon={handleAddCoupon}
+          onDeleteCoupon={handleDeleteCoupon}
+          onSwitchToCustomerView={() => setViewMode('customer')}
+          theme={theme}
+          toggleTheme={toggleTheme}
+        />
+      </div>
+    );
+  }
+
+  // Otherwise render Customer Delivery Storefront
   return (
     <div className="app-container">
       {/* Toast Notification */}
@@ -351,14 +631,18 @@ export default function App() {
         }}
         onOpenPastOrders={() => {
           if (activeOrder) {
-            // Already an active order exists
+            // Already active order
           } else {
             showToast('Showing your live delivery tracking status', 'info');
-            setActiveOrder({
-              restaurant: initialRestaurants[0],
-              items: initialRestaurants[0].menu.slice(0, 2)
+            setActiveOrder(ordersList[0] || {
+              restaurant: restaurantsList[0],
+              items: restaurantsList[0].menu.slice(0, 2)
             });
           }
+        }}
+        onOpenAdmin={() => {
+          setViewMode('admin');
+          showToast('Switched to Crave Foodie Admin Portal', 'info');
         }}
       />
 
@@ -382,7 +666,6 @@ export default function App() {
         activeTab={activeTab} 
         setActiveTab={(tab) => {
           setActiveTab(tab);
-          // Auto scroll to list when tab switched
           scrollToContent();
         }} 
       />
